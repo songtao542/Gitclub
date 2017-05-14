@@ -4,13 +4,13 @@ import android.app.Application;
 
 import com.facebook.drawee.backends.pipeline.Fresco;
 
+import org.gitclub.data.AccessTokenStore;
 import org.gitclub.di.components.ApplicationComponent;
 import org.gitclub.di.components.DaggerApplicationComponent;
-import org.gitclub.di.modules.ApiModule;
 import org.gitclub.di.modules.ApplicationModule;
+import org.gitclub.model.AccessToken;
 
-import dagger.android.AndroidInjector;
-import dagger.android.support.DaggerApplication;
+import javax.inject.Inject;
 
 /**
  * Created by le on 5/8/17.
@@ -19,9 +19,8 @@ import dagger.android.support.DaggerApplication;
 public class GitApplication extends Application {
 
     ApplicationComponent mAppComponent;
-    ApiModule mApiModule;
-
-
+    @Inject
+    AccessTokenStore mAccessTokenStore;
 
     @Override
     public void onCreate() {
@@ -32,8 +31,8 @@ public class GitApplication extends Application {
 
     private void ensureApplicationComponent() {
         if (mAppComponent == null) {
-            mApiModule = new ApiModule();
-            mAppComponent = DaggerApplicationComponent.builder().applicationModule(new ApplicationModule(this)).apiModule(mApiModule).build();
+            mAppComponent = DaggerApplicationComponent.builder().applicationModule(new ApplicationModule(this)).build();
+            mAppComponent.inject(this);
         }
     }
 
@@ -41,11 +40,8 @@ public class GitApplication extends Application {
         return mAppComponent;
     }
 
-    public ApplicationComponent initApiAccessToken(String apiToken) {
-        mApiModule.initApiAccessToken(apiToken);
-        mAppComponent = DaggerApplicationComponent.builder().applicationModule(new ApplicationModule(this)).apiModule(mApiModule).build();
-        return mAppComponent;
+    public void initApiAccessToken(String email, AccessToken token) {
+        mAccessTokenStore.setAccessToken(email, token);
     }
-
 
 }

@@ -42,6 +42,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.inject.Inject;
+import javax.inject.Singleton;
 
 import dagger.Provides;
 
@@ -53,11 +54,10 @@ import static android.Manifest.permission.READ_CONTACTS;
 public class LoginActivity extends BaseActivity implements LoaderCallbacks<Cursor>, LoginView {
 
     @ActivityScope
-    @dagger.Component(dependencies = {ApplicationComponent.class} )
+    @dagger.Component(dependencies = {ApplicationComponent.class})
     public interface Component {
         void inject(LoginActivity activity);
     }
-
 
 
     /**
@@ -126,7 +126,7 @@ public class LoginActivity extends BaseActivity implements LoaderCallbacks<Curso
 
     @Override
     public void accessToken(AccessToken accessToken) {
-        ((GitApplication) getApplication()).initApiAccessToken(accessToken.accessToken);
+        ((GitApplication) getApplication()).initApiAccessToken(accessToken.email, accessToken);
         intentToMain(accessToken.email);
     }
 

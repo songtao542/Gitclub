@@ -66,4 +66,14 @@ public class ApplicationModule {
         return mSharedPreferences;
     }
 
+    @Singleton
+    @Provides
+    public AccessTokenStore accessTokenStore(AccessTokenAccessor accessTokenAccessor) {
+        if (mAccessTokenStore == null) {
+            mAccessTokenStore = new AccessTokenStore(accessTokenAccessor);
+        }
+        return mAccessTokenStore;
+    }
+
+
 }

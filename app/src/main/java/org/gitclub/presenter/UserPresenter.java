@@ -5,6 +5,8 @@ import android.content.Context;
 import org.gitclub.data.AccessTokenAccessor;
 import org.gitclub.data.UserAccessor;
 import org.gitclub.model.User;
+import org.gitclub.net.Api;
+import org.gitclub.net.GithubApi;
 import org.gitclub.net.GithubApiV3;
 import org.gitclub.ui.view.UserView;
 
@@ -24,6 +26,7 @@ public class UserPresenter implements Presenter {
 
     private Context mContext;
     public GithubApiV3 mGithubApiV3;
+    public Api mApi;
     private UserView mUserView;
 
     private UserAccessor mUserAccessor;
@@ -32,9 +35,9 @@ public class UserPresenter implements Presenter {
     private String mEmailAddress;
 
     @Inject
-    public UserPresenter(Context context, GithubApiV3 githubApiV3, UserAccessor userAccessor, AccessTokenAccessor accessTokenAccessor) {
+    public UserPresenter(Context context, Api api, UserAccessor userAccessor, AccessTokenAccessor accessTokenAccessor) {
         mContext = context;
-        mGithubApiV3 = githubApiV3;
+        mApi = api;
         mUserAccessor = userAccessor;
         mAccessTokenAccessor = accessTokenAccessor;
     }
@@ -43,12 +46,17 @@ public class UserPresenter implements Presenter {
         mUserView = userView;
     }
 
-    public void setGithubApiV3(GithubApiV3 githubApiV3) {
-        mGithubApiV3 = githubApiV3;
+    private GithubApiV3 ensureGithubApiV3(String email) {
+        if (mGithubApiV3 == null) {
+            mApi.setUserEmail(email);
+            mGithubApiV3 = mApi.getGithubApiV3();
+        }
+        return mGithubApiV3;
     }
 
     public void getUser(String email) {
         mEmailAddress = email;
+        ensureGithubApiV3(mEmailAddress);
         mGithubApiV3.rxGetUser()
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())

@@ -1,18 +1,15 @@
-package org.gitclub.di.modules;
+package org.gitclub.net;
 
 import com.google.gson.FieldNamingPolicy;
 import com.google.gson.GsonBuilder;
 
-import org.gitclub.net.GithubApi;
-import org.gitclub.net.GithubApiV3;
-import org.gitclub.utils.SLog;
+import org.gitclub.data.AccessTokenStore;
+import org.gitclub.model.AccessToken;
 
 import java.io.IOException;
 
-import javax.inject.Singleton;
+import javax.inject.Inject;
 
-import dagger.Module;
-import dagger.Provides;
 import okhttp3.Interceptor;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -25,44 +22,42 @@ import retrofit2.converter.gson.GsonConverterFactory;
 /**
  * Created by wangsongtao on 2017/5/14.
  */
-@Module
-public class ApiModule {
 
-    private GithubApiV3 mGithubApiV3;
+public class Api {
+
+    private AccessTokenStore mAccessTokenStore;
+    private String mUserEmail;
+
     private GithubApi mGithubApi;
-    private String mApiToken;
+    private GithubApiV3 mGithubApiV3;
 
-    public ApiModule() {
+    @Inject
+    public Api(AccessTokenStore accessTokenStore) {
+        mAccessTokenStore = accessTokenStore;
     }
 
-    public void initApiAccessToken(String apiToken) {
-        mApiToken = apiToken;
-        SLog.d("ApiModule initApiAccessToken:" + apiToken);
-        SLog.d("ApiModule initApiAccessToken mGithubApiV3 before init:" + mGithubApiV3);
-        mGithubApiV3 = createApiV3();
-        SLog.d("ApiModule initApiAccessToken mGithubApiV3 after init :" + mGithubApiV3);
+    public void setUserEmail(String email) {
+        mUserEmail = email;
     }
 
-    @Singleton
-    @Provides
-    public GithubApiV3 provideGithubApiV3() {
-        SLog.d("ApiModule provideGithubApiV3 mGithubApiV3 " + mGithubApiV3);
+    public GithubApiV3 getGithubApiV3() {
+        return createApiV3();
+    }
 
-        if (mGithubApiV3 == null) {
-            mGithubApiV3 = createApiV3();
-        }
-
-        return mGithubApiV3;
+    public GithubApi getGithubApi() {
+        return createApi();
     }
 
     private GithubApiV3 createApiV3() {
+        if (mUserEmail != null && mGithubApiV3 != null) {
+            return mGithubApiV3;
+        }
         OkHttpClient.Builder builder = new OkHttpClient.Builder();
         HttpLoggingInterceptor interceptor = new HttpLoggingInterceptor();
         interceptor.setLevel(HttpLoggingInterceptor.Level.BASIC);
         builder.addInterceptor(interceptor);
-        if (mApiToken != null) {
-            builder.addInterceptor(new HeaderInterceptor(mApiToken));
-        }
+        AccessToken token = mAccessTokenStore.getAccessToken(mUserEmail);
+        builder.addInterceptor(new HeaderInterceptor(token.accessToken));
         GsonBuilder gsonBuilder = new GsonBuilder().setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES);
         Retrofit retrofit = new Retrofit.Builder()
                 .baseUrl("https://api.github.com/")
@@ -70,40 +65,39 @@ public class ApiModule {
                 .addCallAdapterFactory(RxJava2CallAdapterFactory.createAsync())
                 .client(builder.build())
                 .build();
-        return retrofit.create(GithubApiV3.class);
+        mGithubApiV3 = retrofit.create(GithubApiV3.class);
+        return mGithubApiV3;
     }
 
-    @Singleton
-    @Provides
-    public GithubApi provideGithubApi() {
-        if (mGithubApi == null) {
-            OkHttpClient.Builder builder = new OkHttpClient.Builder();
-            HttpLoggingInterceptor interceptor = new HttpLoggingInterceptor();
-            interceptor.setLevel(HttpLoggingInterceptor.Level.BASIC);
-            builder.addInterceptor(interceptor);
-            builder.addInterceptor(new Interceptor() {
-                @Override
-                public Response intercept(Chain chain) throws IOException {
-                    Request request = chain.request()
-                            .newBuilder()
-                            .addHeader("Accept", "application/json")
-                            .addHeader("User-Agent", "Gitclub-App")
-                            .build();
-                    return chain.proceed(request);
-                }
-            });
-            GsonBuilder gsonBuilder = new GsonBuilder().setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES);
-            Retrofit retrofit = new Retrofit.Builder()
-                    .baseUrl("https://github.com/")
-                    .addConverterFactory(GsonConverterFactory.create(gsonBuilder.create()))
-                    .addCallAdapterFactory(RxJava2CallAdapterFactory.createAsync())
-                    .client(builder.build())
-                    .build();
-            mGithubApi = retrofit.create(GithubApi.class);
+    private GithubApi createApi() {
+        if (mGithubApi != null) {
+            return mGithubApi;
         }
+        OkHttpClient.Builder builder = new OkHttpClient.Builder();
+        HttpLoggingInterceptor interceptor = new HttpLoggingInterceptor();
+        interceptor.setLevel(HttpLoggingInterceptor.Level.BASIC);
+        builder.addInterceptor(interceptor);
+        builder.addInterceptor(new Interceptor() {
+            @Override
+            public Response intercept(Chain chain) throws IOException {
+                Request request = chain.request()
+                        .newBuilder()
+                        .addHeader("Accept", "application/json")
+                        .addHeader("User-Agent", "Gitclub-App")
+                        .build();
+                return chain.proceed(request);
+            }
+        });
+        GsonBuilder gsonBuilder = new GsonBuilder().setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES);
+        Retrofit retrofit = new Retrofit.Builder()
+                .baseUrl("https://github.com/")
+                .addConverterFactory(GsonConverterFactory.create(gsonBuilder.create()))
+                .addCallAdapterFactory(RxJava2CallAdapterFactory.createAsync())
+                .client(builder.build())
+                .build();
+        mGithubApi = retrofit.create(GithubApi.class);
         return mGithubApi;
     }
-
 
     static class HeaderInterceptor implements Interceptor {
 
@@ -135,4 +129,5 @@ public class ApiModule {
             return chain.proceed(request);
         }
     }
+
 }

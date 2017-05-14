@@ -88,8 +88,7 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
                 AccessToken accessToken = mAccessTokenAccessor.queryByEmail(mEmailAddress);
                 SLog.d("MainActivity accessToken=" + accessToken);
                 if (accessToken != null && accessToken.accessToken != null) {
-                    ((GitApplication) getApplication()).initApiAccessToken(accessToken.accessToken);
-                    DaggerMainActivity_Component.builder().applicationComponent(getApplicationComponent()).build().inject(this);
+                    ((GitApplication) getApplication()).initApiAccessToken(mEmailAddress, accessToken);
                 } else {
                     intentToLogin();
                     return;

@@ -373,7 +373,7 @@ public class LoginFragment extends Fragment implements LoaderManager.LoaderCallb
 
     @Override
     public void accessToken(final AccessToken accessToken) {
-        ((GitApplication) getActivity().getApplication()).initApiAccessToken(accessToken.accessToken);
+        ((GitApplication) getActivity().getApplication()).initApiAccessToken(accessToken.email, accessToken);
         getActivity().runOnUiThread(new Runnable() {
             @Override
             public void run() {

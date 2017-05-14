@@ -1,24 +1,20 @@
 package org.gitclub.data;
 
-import android.content.Context;
-
 import org.gitclub.model.AccessToken;
 
 import java.util.HashMap;
-
-import javax.inject.Inject;
 
 /**
  * Created by wangsongtao on 2017/5/14.
  */
 
+
 public class AccessTokenStore {
 
-    HashMap<String, AccessToken> store;
+    HashMap<String, AccessToken> store = new HashMap<>();
 
     AccessTokenAccessor mAccessTokenAccessor;
 
-    @Inject
     public AccessTokenStore(AccessTokenAccessor accessTokenAccessor) {
         mAccessTokenAccessor = accessTokenAccessor;
     }

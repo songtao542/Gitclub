@@ -13,13 +13,12 @@ import org.gitclub.utils.SLog;
 import java.util.ArrayList;
 
 import javax.inject.Inject;
+import javax.inject.Singleton;
 
 /**
  * Created by wangsongtao on 2017/5/14.
  */
-
 public class AccessTokenAccessor extends Accessor {
-
 
     @Inject
     public AccessTokenAccessor(Context context) {

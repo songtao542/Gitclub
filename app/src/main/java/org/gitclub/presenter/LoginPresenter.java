@@ -16,6 +16,7 @@ import android.webkit.WebViewClient;
 import org.gitclub.data.AccessTokenAccessor;
 import org.gitclub.model.AccessToken;
 import org.gitclub.model.Scopes;
+import org.gitclub.net.Api;
 import org.gitclub.net.GithubApi;
 import org.gitclub.provider.GitclubContent;
 import org.gitclub.ui.view.LoginView;
@@ -42,6 +43,7 @@ public class LoginPresenter implements Presenter {
     private Context mContext;
 
     private GithubApi mGithubApi;
+    private Api mApi;
 
     private WebView mWebView;
 
@@ -59,9 +61,9 @@ public class LoginPresenter implements Presenter {
     private AccessTokenAccessor mAccessTokenAccessor;
 
     @Inject
-    public LoginPresenter(Context context, GithubApi githubApi, SharedPreferences sharedPreferences, AccessTokenAccessor accessTokenAccessor) {
+    public LoginPresenter(Context context, Api api, SharedPreferences sharedPreferences, AccessTokenAccessor accessTokenAccessor) {
         mContext = context;
-        mGithubApi = githubApi;
+        mApi = api;
         mSharedPreferences = sharedPreferences;
         mAccessTokenAccessor = accessTokenAccessor;
         mWebView = new WebView(context);
@@ -204,7 +206,15 @@ public class LoginPresenter implements Presenter {
         }
     }
 
+    private GithubApi ensureGithubApi() {
+        if (mGithubApi == null) {
+            mGithubApi = mApi.getGithubApi();
+        }
+        return mGithubApi;
+    }
+
     private void accessToken(String code) {
+        ensureGithubApi();
         mGithubApi.rxAccessToken(GithubApi.CLIENT_ID, GithubApi.CLIENT_SECRET, code)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
