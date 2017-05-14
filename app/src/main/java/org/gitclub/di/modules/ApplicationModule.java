@@ -8,6 +8,8 @@ import com.google.gson.FieldNamingPolicy;
 import com.google.gson.GsonBuilder;
 
 import org.gitclub.GitApplication;
+import org.gitclub.data.AccessTokenAccessor;
+import org.gitclub.data.AccessTokenStore;
 import org.gitclub.net.GithubApi;
 import org.gitclub.net.GithubApiV3;
 
@@ -37,30 +39,31 @@ public class ApplicationModule {
 
     private SharedPreferences mSharedPreferences;
 
+    private AccessTokenStore mAccessTokenStore;
+
     public ApplicationModule(GitApplication application) {
         mApplication = application;
     }
 
     @Singleton
     @Provides
-    public GitApplication provideApplication() {
+    public GitApplication application() {
         return mApplication;
     }
 
     @Singleton
     @Provides
-    public Context provideContext() {
+    public Context context() {
         return mApplication;
     }
 
     @Singleton
     @Provides
-    public SharedPreferences provideSharedPreferences() {
+    public SharedPreferences sharedPreferences() {
         if (mSharedPreferences == null) {
             mSharedPreferences = mApplication.getSharedPreferences("gitclub", Context.MODE_PRIVATE);
         }
         return mSharedPreferences;
     }
-
 
 }

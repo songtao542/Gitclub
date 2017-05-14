@@ -50,7 +50,7 @@ public class AccessTokenAccessor extends Accessor {
     }
 
     public void updateUserKeyByEmail(String email, long userKey) {
-        if (email != null && userKey > 0) {
+        if (email != null && userKey >= 0) {
             AccessToken accessToken = queryByEmail(email);
             if (accessToken != null) {
                 accessToken.userId = userKey;

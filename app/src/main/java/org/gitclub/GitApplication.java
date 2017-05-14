@@ -21,6 +21,8 @@ public class GitApplication extends Application {
     ApplicationComponent mAppComponent;
     ApiModule mApiModule;
 
+
+
     @Override
     public void onCreate() {
         super.onCreate();

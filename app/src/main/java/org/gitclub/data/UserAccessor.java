@@ -3,7 +3,6 @@ package org.gitclub.data;
 import android.content.Context;
 import android.database.Cursor;
 
-import org.gitclub.model.AccessToken;
 import org.gitclub.model.User;
 import org.gitclub.provider.GitclubContent;
 import org.gitclub.utils.SLog;
@@ -28,7 +27,7 @@ public class UserAccessor extends Accessor {
         String selection = null;
         String[] selectionArgs = null;
         if (users != null && users.size() > 0) {
-            selection = GitclubContent.AccessTokenColumns._ID + "=?";
+            selection = GitclubContent.UserColumns._ID + "=?";
             selectionArgs = new String[]{String.valueOf(users.get(0).id)};
         }
         insertOrUpdate(user, selection, selectionArgs);
@@ -36,9 +35,9 @@ public class UserAccessor extends Accessor {
 
     public void insertOrUpdate(User user, String selection, String[] selectionArgs) {
         if (selection != null && selection.length() > 0) {
-            update(GitclubContent.AccessToken.CONTENT_URI, user.toContentValues(), selection, selectionArgs);
+            update(GitclubContent.User.CONTENT_URI, user.toContentValues(), selection, selectionArgs);
         } else {
-            insert(GitclubContent.AccessToken.CONTENT_URI, user.toContentValues());
+            insert(GitclubContent.User.CONTENT_URI, user.toContentValues());
         }
     }
 
