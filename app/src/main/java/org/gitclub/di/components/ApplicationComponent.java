@@ -6,6 +6,7 @@ import android.content.SharedPreferences;
 import org.gitclub.GitApplication;
 import org.gitclub.data.AccessTokenStore;
 import org.gitclub.di.modules.ApplicationModule;
+import org.gitclub.net.Api;
 import org.gitclub.net.GithubApi;
 import org.gitclub.net.GithubApiV3;
 
@@ -40,8 +41,13 @@ public interface ApplicationComponent {
     SharedPreferences sharedPreferences();
 
     /**
-     * @return
+     * @return AccessTokenStore
      */
     AccessTokenStore accessTokenStore();
+
+    /**
+     * @return Api
+     */
+    Api api();
 
 }

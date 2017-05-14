@@ -31,7 +31,6 @@ public class Api {
     private GithubApi mGithubApi;
     private GithubApiV3 mGithubApiV3;
 
-    @Inject
     public Api(AccessTokenStore accessTokenStore) {
         mAccessTokenStore = accessTokenStore;
     }

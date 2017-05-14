@@ -10,6 +10,7 @@ import com.google.gson.GsonBuilder;
 import org.gitclub.GitApplication;
 import org.gitclub.data.AccessTokenAccessor;
 import org.gitclub.data.AccessTokenStore;
+import org.gitclub.net.Api;
 import org.gitclub.net.GithubApi;
 import org.gitclub.net.GithubApiV3;
 
@@ -40,6 +41,7 @@ public class ApplicationModule {
     private SharedPreferences mSharedPreferences;
 
     private AccessTokenStore mAccessTokenStore;
+    private Api mApi;
 
     public ApplicationModule(GitApplication application) {
         mApplication = application;
@@ -76,4 +78,12 @@ public class ApplicationModule {
     }
 
 
+    @Singleton
+    @Provides
+    public Api api(AccessTokenStore accessTokenStore) {
+        if (mApi == null) {
+            mApi = new Api(accessTokenStore);
+        }
+        return mApi;
+    }
 }
