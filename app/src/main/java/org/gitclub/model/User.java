@@ -13,8 +13,9 @@ import java.util.ArrayList;
  */
 
 public class User {
+    public long _id;
     public String login;
-    public int id;// 5105572,
+    public long id;// 5105572,
     public String avatarUrl;// "https;////avatars3.githubusercontent.com/u/5105572?v=3",
     public String gravatarId;// "",
     public String url;// "https;////api.github.com/users/songtao542",
@@ -58,6 +59,7 @@ public class User {
     public ContentValues toContentValues() {
         ContentValues values = new ContentValues();
         values.put(GitclubContent.UserColumns.LOGIN, login);
+        values.put(GitclubContent.UserColumns._ID, _id);
         values.put(GitclubContent.UserColumns.ID, id);
         values.put(GitclubContent.UserColumns.AVATAR_URL, avatarUrl);
         values.put(GitclubContent.UserColumns.GRAVATAR_ID, gravatarId);
@@ -96,48 +98,53 @@ public class User {
     }
 
     public static ArrayList<User> fromCursor(Cursor cursor) {
-        if (cursor == null) {
+        if (cursor == null || cursor.getCount() <= 0) {
             return null;
         }
         ArrayList<User> users = new ArrayList<>(cursor.getCount());
-        while (cursor.moveToNext()) {
-            User user = new User();
-            user.login = cursor.getString(cursor.getColumnIndex(GitclubContent.UserColumns.LOGIN));
-            user.id = cursor.getInt(cursor.getColumnIndex(GitclubContent.UserColumns.ID));
-            user.avatarUrl = cursor.getString(cursor.getColumnIndex(GitclubContent.UserColumns.AVATAR_URL));
-            user.gravatarId = cursor.getString(cursor.getColumnIndex(GitclubContent.UserColumns.GRAVATAR_ID));
-            user.url = cursor.getString(cursor.getColumnIndex(GitclubContent.UserColumns.URL));
-            user.htmlUrl = cursor.getString(cursor.getColumnIndex(GitclubContent.UserColumns.HTML_URL));
-            user.followersUrl = cursor.getString(cursor.getColumnIndex(GitclubContent.UserColumns.FOLLOWERS_URL));
-            user.followingUrl = cursor.getString(cursor.getColumnIndex(GitclubContent.UserColumns.FOLLOWING_URL));
-            user.gistsUrl = cursor.getString(cursor.getColumnIndex(GitclubContent.UserColumns.GISTS_URL));
-            user.starredUrl = cursor.getString(cursor.getColumnIndex(GitclubContent.UserColumns.STARRED_URL));
-            user.subscriptionsUrl = cursor.getString(cursor.getColumnIndex(GitclubContent.UserColumns.SUBSCRIPTIONS_URL));
-            user.organizationsUrl = cursor.getString(cursor.getColumnIndex(GitclubContent.UserColumns.ORGANIZATIONS_URL));
-            user.reposUrl = cursor.getString(cursor.getColumnIndex(GitclubContent.UserColumns.REPOS_URL));
-            user.eventsUrl = cursor.getString(cursor.getColumnIndex(GitclubContent.UserColumns.EVENTS_URL));
-            user.receivedEventsUrl = cursor.getString(cursor.getColumnIndex(GitclubContent.UserColumns.RECEIVED_EVENTS_URL));
-            user.type = cursor.getString(cursor.getColumnIndex(GitclubContent.UserColumns.TYPE));
-            user.siteAdmin = cursor.getInt(cursor.getColumnIndex(GitclubContent.UserColumns.SITE_ADMIN)) == 1 ? true : false;
-            user.name = cursor.getString(cursor.getColumnIndex(GitclubContent.UserColumns.NAME));
-            user.company = cursor.getString(cursor.getColumnIndex(GitclubContent.UserColumns.COMPANY));
-            user.blog = cursor.getString(cursor.getColumnIndex(GitclubContent.UserColumns.BLOG));
-            user.location = cursor.getString(cursor.getColumnIndex(GitclubContent.UserColumns.LOCATION));
-            user.email = cursor.getString(cursor.getColumnIndex(GitclubContent.UserColumns.EMAIL));
-            user.hireable = cursor.getString(cursor.getColumnIndex(GitclubContent.UserColumns.HIREABLE));
-            user.bio = cursor.getString(cursor.getColumnIndex(GitclubContent.UserColumns.BIO));
-            user.publicRepos = cursor.getInt(cursor.getColumnIndex(GitclubContent.UserColumns.PUBLIC_REPOS));
-            user.publicGists = cursor.getInt(cursor.getColumnIndex(GitclubContent.UserColumns.PUBLIC_GISTS));
-            user.followers = cursor.getInt(cursor.getColumnIndex(GitclubContent.UserColumns.FOLLOWERS));
-            user.following = cursor.getInt(cursor.getColumnIndex(GitclubContent.UserColumns.FOLLOWING));
-            user.createdAt = cursor.getString(cursor.getColumnIndex(GitclubContent.UserColumns.CREATED_AT));
-            user.updatedAt = cursor.getString(cursor.getColumnIndex(GitclubContent.UserColumns.UPDATED_AT));
-            user.totalPrivateRepos = cursor.getInt(cursor.getColumnIndex(GitclubContent.UserColumns.TOTAL_PRIVATE_REPOS));
-            user.ownedPrivateRepos = cursor.getInt(cursor.getColumnIndex(GitclubContent.UserColumns.OWNED_PRIVATE_REPOS));
-            user.diskUsage = cursor.getInt(cursor.getColumnIndex(GitclubContent.UserColumns.DISK_USAGE));
-            user.collaborators = cursor.getInt(cursor.getColumnIndex(GitclubContent.UserColumns.COLLABORATORS));
-            user.twoFactorAuthentication = cursor.getInt(cursor.getColumnIndex(GitclubContent.UserColumns.TWO_FACTOR_AUTHENTICATION)) == 1 ? true : false;
-            users.add(user);
+        try {
+            while (cursor.moveToNext()) {
+                User user = new User();
+                user.login = cursor.getString(cursor.getColumnIndex(GitclubContent.UserColumns.LOGIN));
+                user._id = cursor.getLong(cursor.getColumnIndex(GitclubContent.UserColumns._ID));
+                user.id = cursor.getLong(cursor.getColumnIndex(GitclubContent.UserColumns.ID));
+                user.avatarUrl = cursor.getString(cursor.getColumnIndex(GitclubContent.UserColumns.AVATAR_URL));
+                user.gravatarId = cursor.getString(cursor.getColumnIndex(GitclubContent.UserColumns.GRAVATAR_ID));
+                user.url = cursor.getString(cursor.getColumnIndex(GitclubContent.UserColumns.URL));
+                user.htmlUrl = cursor.getString(cursor.getColumnIndex(GitclubContent.UserColumns.HTML_URL));
+                user.followersUrl = cursor.getString(cursor.getColumnIndex(GitclubContent.UserColumns.FOLLOWERS_URL));
+                user.followingUrl = cursor.getString(cursor.getColumnIndex(GitclubContent.UserColumns.FOLLOWING_URL));
+                user.gistsUrl = cursor.getString(cursor.getColumnIndex(GitclubContent.UserColumns.GISTS_URL));
+                user.starredUrl = cursor.getString(cursor.getColumnIndex(GitclubContent.UserColumns.STARRED_URL));
+                user.subscriptionsUrl = cursor.getString(cursor.getColumnIndex(GitclubContent.UserColumns.SUBSCRIPTIONS_URL));
+                user.organizationsUrl = cursor.getString(cursor.getColumnIndex(GitclubContent.UserColumns.ORGANIZATIONS_URL));
+                user.reposUrl = cursor.getString(cursor.getColumnIndex(GitclubContent.UserColumns.REPOS_URL));
+                user.eventsUrl = cursor.getString(cursor.getColumnIndex(GitclubContent.UserColumns.EVENTS_URL));
+                user.receivedEventsUrl = cursor.getString(cursor.getColumnIndex(GitclubContent.UserColumns.RECEIVED_EVENTS_URL));
+                user.type = cursor.getString(cursor.getColumnIndex(GitclubContent.UserColumns.TYPE));
+                user.siteAdmin = cursor.getInt(cursor.getColumnIndex(GitclubContent.UserColumns.SITE_ADMIN)) == 1 ? true : false;
+                user.name = cursor.getString(cursor.getColumnIndex(GitclubContent.UserColumns.NAME));
+                user.company = cursor.getString(cursor.getColumnIndex(GitclubContent.UserColumns.COMPANY));
+                user.blog = cursor.getString(cursor.getColumnIndex(GitclubContent.UserColumns.BLOG));
+                user.location = cursor.getString(cursor.getColumnIndex(GitclubContent.UserColumns.LOCATION));
+                user.email = cursor.getString(cursor.getColumnIndex(GitclubContent.UserColumns.EMAIL));
+                user.hireable = cursor.getString(cursor.getColumnIndex(GitclubContent.UserColumns.HIREABLE));
+                user.bio = cursor.getString(cursor.getColumnIndex(GitclubContent.UserColumns.BIO));
+                user.publicRepos = cursor.getInt(cursor.getColumnIndex(GitclubContent.UserColumns.PUBLIC_REPOS));
+                user.publicGists = cursor.getInt(cursor.getColumnIndex(GitclubContent.UserColumns.PUBLIC_GISTS));
+                user.followers = cursor.getInt(cursor.getColumnIndex(GitclubContent.UserColumns.FOLLOWERS));
+                user.following = cursor.getInt(cursor.getColumnIndex(GitclubContent.UserColumns.FOLLOWING));
+                user.createdAt = cursor.getString(cursor.getColumnIndex(GitclubContent.UserColumns.CREATED_AT));
+                user.updatedAt = cursor.getString(cursor.getColumnIndex(GitclubContent.UserColumns.UPDATED_AT));
+                user.totalPrivateRepos = cursor.getInt(cursor.getColumnIndex(GitclubContent.UserColumns.TOTAL_PRIVATE_REPOS));
+                user.ownedPrivateRepos = cursor.getInt(cursor.getColumnIndex(GitclubContent.UserColumns.OWNED_PRIVATE_REPOS));
+                user.diskUsage = cursor.getInt(cursor.getColumnIndex(GitclubContent.UserColumns.DISK_USAGE));
+                user.collaborators = cursor.getInt(cursor.getColumnIndex(GitclubContent.UserColumns.COLLABORATORS));
+                user.twoFactorAuthentication = cursor.getInt(cursor.getColumnIndex(GitclubContent.UserColumns.TWO_FACTOR_AUTHENTICATION)) == 1 ? true : false;
+                users.add(user);
+            }
+        } finally {
+            cursor.close();
         }
         return users;
     }

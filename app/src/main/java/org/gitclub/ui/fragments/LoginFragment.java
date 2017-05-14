@@ -1,21 +1,14 @@
-package org.gitclub.ui;
+package org.gitclub.ui.fragments;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.annotation.TargetApi;
-
-import android.content.ContentProviderOperation;
-import android.content.ContentValues;
 import android.content.Context;
-
-import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
-import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-import android.preference.Preference;
 import android.provider.ContactsContract;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -32,14 +25,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
-import android.webkit.CookieManager;
-import android.webkit.JavascriptInterface;
-import android.webkit.WebResourceError;
-import android.webkit.WebResourceRequest;
-import android.webkit.WebResourceResponse;
-import android.webkit.WebSettings;
-import android.webkit.WebView;
-import android.webkit.WebViewClient;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
@@ -47,27 +32,17 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import org.gitclub.ApplicationComponent;
 import org.gitclub.GitApplication;
-import org.gitclub.GithubApi;
 import org.gitclub.R;
 import org.gitclub.model.AccessToken;
-import org.gitclub.model.Scopes;
-import org.gitclub.model.User;
-import org.gitclub.provider.GitclubContent;
-import org.gitclub.ui.module.DaggerLoginComponent;
-import org.gitclub.ui.module.LoginModule;
+import org.gitclub.presenter.LoginPresenter;
+import org.gitclub.ui.view.LoginView;
 import org.gitclub.utils.SLog;
-import org.gitclub.utils.ToString;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import javax.inject.Inject;
-
-import io.reactivex.android.schedulers.AndroidSchedulers;
-import io.reactivex.functions.Consumer;
-import io.reactivex.schedulers.Schedulers;
 
 import static android.Manifest.permission.READ_CONTACTS;
 
@@ -79,7 +54,7 @@ import static android.Manifest.permission.READ_CONTACTS;
  * Use the {@link LoginFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class LoginFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor> {
+public class LoginFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor>, LoginView {
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_PARAM1 = "param1";
@@ -104,10 +79,6 @@ public class LoginFragment extends Fragment implements LoaderManager.LoaderCallb
     private static final String[] DUMMY_CREDENTIALS = new String[]{
             "foo@example.com:hello", "bar@example.com:world"
     };
-    /**
-     * Keep track of the login task to ensure we can cancel it if requested.
-     */
-    private LoginActivity.UserLoginTask mAuthTask = null;
 
     // UI references.
     private AutoCompleteTextView mEmailView;
@@ -115,24 +86,8 @@ public class LoginFragment extends Fragment implements LoaderManager.LoaderCallb
     private View mProgressView;
     private View mLoginFormView;
 
-    private WebView mWebView;
-    private boolean mIsReady;
-    private boolean mWaitLogin;
-    private int mLoadCounter = 0;
-
-    private String mCode;
-
-    private String mEmail;
-    private String mPassword;
-
-    static final String LOGIN_MATCH_URL = "https://github.com/login?client_id=" + GithubApi.CLIENT_ID + "&return_to=%2Flogin%2Foauth%2Fauthorize%3Fclient_id%3D8c148bb9efb6382368f4%26";
-
-    static final String AUTHORIZE_URL = GithubApi.AUTHORIZE_URL + Scopes.user + " " + Scopes.repo;
-
     @Inject
-    LoginModule.LoginApi mLoginApi;
-
-    ApplicationComponent mAppComponent;
+    LoginPresenter mLoginPresenter;
 
     public LoginFragment() {
         // Required empty public constructor
@@ -217,108 +172,7 @@ public class LoginFragment extends Fragment implements LoaderManager.LoaderCallb
         mEmailView.setText("songtao542@gmail.com");
         mPasswordView.setText("wst472036045");
 
-
-        ApplicationComponent appComponent = ((GitApplication) getActivity().getApplication()).getApplicationComponent();
-        DaggerLoginComponent.builder().applicationComponent(appComponent).build().inject(this);
-
-        mWebView = new WebView(getActivity());
-        //mWebView = (WebView) findViewById(R.id.webview);
-        WebSettings webSettings = mWebView.getSettings();
-        webSettings.setJavaScriptEnabled(true);
-        webSettings.setSavePassword(false);
-        webSettings.setSaveFormData(false);
-        webSettings.setDomStorageEnabled(false);
-        webSettings.setCacheMode(WebSettings.LOAD_NO_CACHE);
-
-        CookieManager.getInstance().removeAllCookies(null);
-        CookieManager.getInstance().flush();
-
-        mWebView.addJavascriptInterface(new LoginActivity.InJavaScriptInterface(), "local");
-        mWebView.setWebViewClient(new WebViewClient() {
-            @Override
-            public void onPageStarted(WebView view, String url, Bitmap favicon) {
-                mLoadCounter++;
-                SLog.d("onPageStarted url:" + url);
-                String prefix = "http://localhost:4567/callback?code=";
-                if (url.startsWith(prefix)) {
-                    mCode = url.substring(prefix.length());
-                    SLog.d("onPageStarted mCode:" + mCode);
-                    accessToken(mCode);
-                } else if (view.getTitle().contains("Authorize GitClub")) {
-                    needAuthorize();
-                }
-            }
-
-            @Override
-            public void onPageFinished(WebView view, String url) {
-                SLog.d("onPageFinished url:" + url);
-                //view.loadUrl("javascript:window.local.showSource('<html>'+document.getElementsByTagName('html')[0].innerHTML+'</html>');");
-
-                if (url.startsWith(LOGIN_MATCH_URL)) {
-                    SLog.d("login page is ready");
-                    mIsReady = true;
-                    hiddenHeader();
-
-                    if (mWaitLogin) {
-                        mWaitLogin = false;
-                        login(mEmail, mPassword);
-                    }
-                } else {
-                    mIsReady = false;
-                    if (view.getTitle().contains("Authorize GitClub")) {
-                        needAuthorize();
-                    }
-                }
-            }
-
-            @Override
-            public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
-                if (mLoadCounter == 1) {
-                    return false;
-                }
-                return super.shouldOverrideUrlLoading(view, request);
-            }
-
-            @Override
-            public void onReceivedError(WebView view, WebResourceRequest request, WebResourceError error) {
-                SLog.d("onReceivedError error:" + error);
-                Uri uri = request != null ? request.getUrl() : null;
-                String url = uri != null ? uri.toString() : "";
-                String prefix = "http://localhost:4567/callback?code=";
-                if (!url.startsWith(prefix)) {
-                    showError();
-                }
-            }
-
-            @Override
-            public void onReceivedHttpError(WebView view, WebResourceRequest request, WebResourceResponse errorResponse) {
-                SLog.d("onReceivedHttpError errorResponse:" + errorResponse);
-                Uri uri = request != null ? request.getUrl() : null;
-                String url = uri != null ? uri.toString() : "";
-                String prefix = "http://localhost:4567/callback?code=";
-                if (!url.startsWith(prefix)) {
-                    showError();
-                }
-            }
-        });
-
-        mWebView.loadUrl(AUTHORIZE_URL);
-    }
-
-    final static class InJavaScriptInterface {
-        @JavascriptInterface
-        public void showSource(String html) {
-            System.out.println(html);
-        }
-    }
-
-    private void needAuthorize() {
-        String js = "javascript:(function(){" +
-                "var authorize = document.getElementsByName(\"authorize\"); " +
-                "authorize[0].click();" +
-                "console.log(\"点击授权\");" +
-                "})()";
-        mWebView.evaluateJavascript(js, null);
+        mLoginPresenter.setLoginView(this);
     }
 
     private void populateAutoComplete() {
@@ -371,10 +225,6 @@ public class LoginFragment extends Fragment implements LoaderManager.LoaderCallb
      * errors are presented and no actual login attempt is made.
      */
     private void attemptLogin() {
-        if (mAuthTask != null) {
-            return;
-        }
-
         // Reset errors.
         mEmailView.setError(null);
         mPasswordView.setError(null);
@@ -416,180 +266,8 @@ public class LoginFragment extends Fragment implements LoaderManager.LoaderCallb
 //            mAuthTask.execute((Void) null);
 
             SLog.d("start login ...");
-            mEmail = email;
-            mPassword = password;
-            if (!mIsReady) {
-                mWebView.loadUrl(AUTHORIZE_URL);
-                mWaitLogin = true;
-            } else {
-                login(mEmail, mPassword);
-            }
-
-//            mEmailView.postDelayed(new Runnable() {
-//                @Override
-//                public void run() {
-//                    showProgress(false);
-//                    loginSuccess();
-//                }
-//
-//            }, 3000);
+            mLoginPresenter.login(email, password);
         }
-    }
-
-    private void showError() {
-        getActivity().runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                if (mLoadCounter > 1) {
-                    Toast.makeText(getActivity(), getString(R.string.error_failure), Toast.LENGTH_SHORT).show();
-                }
-            }
-        });
-    }
-
-    private void hiddenHeader() {
-        String js = "javascript:(function(){" +
-                "document.getElementsByClassName(\"nav-bar\")[0].style.visibility=\"hidden\";" +
-                "console.log(\"隐藏标题栏\");" +
-                "})()";
-        mWebView.evaluateJavascript(js, null);
-    }
-
-    private void login(String email, String password) {
-        String js = "javascript:(function(){" +
-                "var username = document.getElementsByName(\"login\");" +
-                "var password = document.getElementsByName(\"password\"); " +
-                "var commit = document.getElementsByClassName(\"btn btn-block\"); " +
-                "username[0].value = \"" + email + "\";" +
-                "password[0].value= \"" + password + "\";" +
-                "commit[0].click();" +
-                "console.log(\"点击登录\");" +
-                "})()";
-        mWebView.evaluateJavascript(js, null);
-    }
-
-    private void accessToken(String code) {
-        mLoginApi.rxAccessToken(GithubApi.CLIENT_ID, GithubApi.CLIENT_SECRET, code)
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .doOnError(new Consumer<Throwable>() {
-                    @Override
-                    public void accept(@io.reactivex.annotations.NonNull Throwable throwable) throws Exception {
-                        showError();
-                    }
-                })
-                .subscribe(new Consumer<AccessToken>() {
-                    @Override
-                    public void accept(@io.reactivex.annotations.NonNull final AccessToken accessToken) throws Exception {
-                        if (accessToken != null) {
-                            SLog.d("response accessToken:" + accessToken.accessToken);
-                            SLog.d("response tokenType:" + accessToken.tokenType);
-                            SLog.d("response scope:" + accessToken.scope);
-                            mAppComponent = ((GitApplication) getActivity().getApplication()).initApplicationComponentWithApiToken(accessToken.accessToken);
-                            GithubApi githubApi = mAppComponent.api();
-                            githubApi.rxGetUser()
-                                    .subscribeOn(Schedulers.io())
-                                    .doOnError(new Consumer<Throwable>() {
-                                        @Override
-                                        public void accept(@io.reactivex.annotations.NonNull Throwable throwable) throws Exception {
-                                            showError();
-                                        }
-                                    })
-                                    .subscribe(new Consumer<User>() {
-                                        @Override
-                                        public void accept(@io.reactivex.annotations.NonNull User user) throws Exception {
-                                            saveUserAccessToken(user, accessToken);
-                                            showProgressOnMainThread(false);
-                                            loginSuccess();
-                                        }
-                                    })
-                            ;
-                        } else {
-                            SLog.d("response accessToken is null");
-                        }
-                    }
-                });
-    }
-
-
-    private void saveUserAccessToken(User user, AccessToken accessToken) {
-        SLog.d("saveUserAccessToken accessToken:" + accessToken + "\nuser:" + ToString.toString(user));
-        ArrayList<ContentProviderOperation> ops = new ArrayList<>();
-
-
-        if (user == null) {
-            user = new User();
-        }
-        if (user.email == null) {
-            user.email = mEmail;
-        }
-
-        SharedPreferences sharedPreferences = mAppComponent.sharedPreferences();
-        SharedPreferences.Editor editor = sharedPreferences.edit();
-        editor.putString("login", user.email);
-        editor.commit();
-
-
-        Uri.Builder builder = GitclubContent.User.CONTENT_URI.buildUpon();
-        builder.appendEncodedPath("email")
-                .appendEncodedPath(user.email);
-        Uri uri = builder.build();
-        SLog.d("query uri:" + uri);
-        Cursor cursor = getActivity().getContentResolver().query(uri, new String[]{GitclubContent.UserColumns._ID}, null, null, null);
-
-        if (cursor == null || cursor.getCount() == 0) {
-            ops.add(ContentProviderOperation.newInsert(GitclubContent.User.CONTENT_URI)
-                    .withValues(user.toContentValues())
-                    .build());
-
-            ContentValues backReferences = new ContentValues();
-            backReferences.put(GitclubContent.AccessTokenColumns.USER_KEY, 0);
-
-            ops.add(ContentProviderOperation.newInsert(GitclubContent.AccessToken.CONTENT_URI)
-                    .withValues(accessToken.toContentValues())
-                    .withValueBackReferences(backReferences)
-                    .build());
-        } else {
-            int idIndex = cursor.getColumnIndex(GitclubContent.UserColumns._ID);
-            cursor.moveToNext();
-            long id = cursor.getLong(idIndex);
-            SLog.d("user _id=" + id);
-            ops.add(ContentProviderOperation.newUpdate(GitclubContent.User.CONTENT_URI)
-                    .withSelection(GitclubContent.UserColumns._ID + "=?", new String[]{String.valueOf(id)})
-                    .withValues(user.toContentValues())
-                    .build());
-
-            ContentValues backReferences = new ContentValues();
-            backReferences.put(GitclubContent.AccessTokenColumns.USER_KEY, 0);
-
-            ops.add(ContentProviderOperation.newUpdate(GitclubContent.AccessToken.CONTENT_URI)
-                    .withValues(accessToken.toContentValues())
-                    .withSelection(GitclubContent.AccessTokenColumns.USER_KEY + "=?", new String[]{String.valueOf(id)})
-                    .withValueBackReferences(backReferences)
-                    .build());
-        }
-
-
-        try {
-            getActivity().getContentResolver().applyBatch(GitclubContent.AUTHORITY, ops);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-    private void loginSuccess() {
-        getActivity().runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                if (mListener != null) {
-                    Uri.Builder builder = new Uri.Builder();
-                    builder.authority("org.gitclub.fragment")
-                            .appendEncodedPath("login")
-                            .appendEncodedPath(mEmail);
-                    mListener.onFragmentInteraction(builder.build());
-                }
-            }
-        });
     }
 
     private boolean isEmailValid(String email) {
@@ -691,6 +369,51 @@ public class LoginFragment extends Fragment implements LoaderManager.LoaderCallb
                         android.R.layout.simple_dropdown_item_1line, emailAddressCollection);
 
         mEmailView.setAdapter(adapter);
+    }
+
+    @Override
+    public void accessToken(final AccessToken accessToken) {
+        ((GitApplication) getActivity().getApplication()).initApiAccessToken(accessToken.accessToken);
+        getActivity().runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                if (mListener != null) {
+                    Uri.Builder builder = new Uri.Builder();
+                    builder.authority("org.gitclub.fragment")
+                            .appendEncodedPath("login")
+                            .appendEncodedPath(accessToken.email);
+                    mListener.onFragmentInteraction(builder.build());
+                }
+            }
+        });
+    }
+
+    @Override
+    public void showLoading() {
+        showProgressOnMainThread(true);
+    }
+
+    @Override
+    public void hideLoading() {
+        showProgressOnMainThread(false);
+    }
+
+    @Override
+    public void showRetry() {
+    }
+
+    @Override
+    public void hideRetry() {
+    }
+
+    @Override
+    public void showError(String message) {
+        getActivity().runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                Toast.makeText(getActivity(), getString(R.string.error_failure), Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 
 

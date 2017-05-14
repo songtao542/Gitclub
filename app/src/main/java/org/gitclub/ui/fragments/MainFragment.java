@@ -1,6 +1,5 @@
-package org.gitclub.ui;
+package org.gitclub.ui.fragments;
 
-import android.app.Activity;
 import android.content.Context;
 import android.database.Cursor;
 import android.net.Uri;
@@ -20,17 +19,13 @@ import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.facebook.drawee.view.SimpleDraweeView;
 
-import org.gitclub.ApplicationComponent;
-import org.gitclub.GitApplication;
 import org.gitclub.R;
 import org.gitclub.model.User;
 import org.gitclub.provider.GitclubContent;
-import org.gitclub.ui.module.DaggerMainComponent;
 import org.gitclub.utils.SLog;
 
 import java.util.ArrayList;
@@ -136,10 +131,12 @@ public class MainFragment extends Fragment implements NavigationView.OnNavigatio
     }
 
 
-    public void onBackPressed() {
+    public boolean onBackPressed() {
         if (mDrawer != null && mDrawer.isDrawerOpen(GravityCompat.START)) {
             mDrawer.closeDrawer(GravityCompat.START);
+            return true;
         }
+        return false;
     }
 
 
@@ -164,19 +161,19 @@ public class MainFragment extends Fragment implements NavigationView.OnNavigatio
         // Handle navigation view item clicks here.
         int id = item.getItemId();
 
-        if (id == R.id.nav_camera) {
-            // Handle the camera action
-        } else if (id == R.id.nav_gallery) {
-
-        } else if (id == R.id.nav_slideshow) {
-
-        } else if (id == R.id.nav_manage) {
-
-        } else if (id == R.id.nav_share) {
-
-        } else if (id == R.id.nav_send) {
-
-        }
+//        if (id == R.id.nav_camera) {
+//            // Handle the camera action
+//        } else if (id == R.id.nav_gallery) {
+//
+//        } else if (id == R.id.nav_slideshow) {
+//
+//        } else if (id == R.id.nav_manage) {
+//
+//        } else if (id == R.id.nav_share) {
+//
+//        } else if (id == R.id.nav_send) {
+//
+//        }
 
         mDrawer.closeDrawer(GravityCompat.START);
         return true;
@@ -197,10 +194,6 @@ public class MainFragment extends Fragment implements NavigationView.OnNavigatio
         } else {
             throw new RuntimeException(context.toString()
                     + " must implement OnFragmentInteractionListener");
-        }
-        if (context instanceof Activity) {
-            ApplicationComponent appComponent = ((GitApplication) ((Activity) context).getApplication()).getApplicationComponent();
-            DaggerMainComponent.builder().applicationComponent(appComponent).build().inject(this);
         }
     }
 

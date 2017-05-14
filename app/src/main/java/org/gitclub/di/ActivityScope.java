@@ -13,8 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.gitclub.ui.module;
+package org.gitclub.di;
 
+import java.lang.annotation.Documented;
 import java.lang.annotation.Retention;
 
 import javax.inject.Scope;
@@ -27,6 +28,7 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
  * correct component.
  */
 @Scope
+@Documented
 @Retention(RUNTIME)
 public @interface ActivityScope {
 }

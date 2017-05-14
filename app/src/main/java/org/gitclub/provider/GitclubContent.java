@@ -15,6 +15,7 @@ public class GitclubContent {
 
     public interface AccessTokenColumns extends BaseColumns {
         String USER_KEY = "userKey";
+        String USER_EMAIL = "userEmail";
         String ACCESS_TOKEN = "accessToken";
         String TOKEN_TYPE = "tokenType";
         String SCOPE = "scope";

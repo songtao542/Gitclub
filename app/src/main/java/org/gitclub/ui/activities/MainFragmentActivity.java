@@ -1,21 +1,19 @@
-package org.gitclub.ui;
+package org.gitclub.ui.activities;
 
 import android.content.SharedPreferences;
 import android.content.UriMatcher;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.FragmentTransaction;
-import android.support.v4.view.GravityCompat;
-import android.support.v7.app.AppCompatActivity;
 
-import org.gitclub.ApplicationComponent;
-import org.gitclub.GitApplication;
 import org.gitclub.R;
-import org.gitclub.ui.module.DaggerMainComponent;
+import org.gitclub.ui.fragments.LoginFragment;
+import org.gitclub.ui.fragments.MainFragment;
+
 import javax.inject.Inject;
 
 
-public class MainFragmentActivity extends AppCompatActivity
+public class MainFragmentActivity extends BaseActivity
         implements LoginFragment.OnFragmentInteractionListener, MainFragment.OnFragmentInteractionListener {
 
     LoginFragment mLoginFragment;
@@ -28,10 +26,6 @@ public class MainFragmentActivity extends AppCompatActivity
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        //setContentView(R.layout.activity_main);
-
-        ApplicationComponent appComponent = ((GitApplication) getApplication()).getApplicationComponent();
-        DaggerMainComponent.builder().applicationComponent(appComponent).build().inject(this);
 
         String login = mSharedPreferences.getString("login", null);
         if (login == null) {
@@ -57,9 +51,7 @@ public class MainFragmentActivity extends AppCompatActivity
 
     @Override
     public void onBackPressed() {
-        if (mMainFragment != null && mMainFragment.mDrawer.isDrawerOpen(GravityCompat.START)) {
-            mMainFragment.mDrawer.closeDrawer(GravityCompat.START);
-        } else {
+        if (mMainFragment == null || !mMainFragment.onBackPressed()) {
             super.onBackPressed();
         }
     }

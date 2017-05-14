@@ -23,6 +23,12 @@ public class DBHelper {
                     " where " + AccessTokenColumns.USER_KEY + "=old." + BaseColumns._ID +
                     "; end";
 
+    private static final String TRIGGER_ACCESS_TOKEN_DELETE =
+            "create trigger access_token_delete before delete on " + AccessToken.TABLE_NAME +
+                    " begin delete from " + User.TABLE_NAME +
+                    " where " + UserColumns.EMAIL + "=old." + AccessTokenColumns.USER_KEY +
+                    "; end";
+
     static void createUserTable(SQLiteDatabase db) {
         String s = " (" + UserColumns._ID + " integer primary key autoincrement, "
                 + UserColumns.LOGIN + " text, "
@@ -69,11 +75,14 @@ public class DBHelper {
     static void createAccessTokenTable(SQLiteDatabase db) {
         String s = " (" + AccessTokenColumns._ID + " integer primary key autoincrement, "
                 + AccessTokenColumns.USER_KEY + " integer, "
+                + AccessTokenColumns.USER_EMAIL + " text, "
                 + AccessTokenColumns.ACCESS_TOKEN + " text, "
                 + AccessTokenColumns.TOKEN_TYPE + " text, "
                 + AccessTokenColumns.SCOPE + " text"
                 + ");";
         db.execSQL("create table " + AccessToken.TABLE_NAME + s);
+        // Deleting an access token deletes associated user
+        db.execSQL(TRIGGER_ACCESS_TOKEN_DELETE);
     }
 
 

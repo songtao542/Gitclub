@@ -1,88 +1,111 @@
-package org.gitclub;
-
-import android.app.Application;
-import android.content.Context;
-import android.content.SharedPreferences;
-import android.util.Base64;
+package org.gitclub.di.modules;
 
 import com.google.gson.FieldNamingPolicy;
 import com.google.gson.GsonBuilder;
 
+import org.gitclub.net.GithubApi;
+import org.gitclub.net.GithubApiV3;
 import org.gitclub.utils.SLog;
 
 import java.io.IOException;
-import java.nio.charset.Charset;
 
 import javax.inject.Singleton;
 
 import dagger.Module;
 import dagger.Provides;
-import okhttp3.Credentials;
 import okhttp3.Interceptor;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
 import okhttp3.logging.HttpLoggingInterceptor;
-import okio.ByteString;
 import retrofit2.Retrofit;
 import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory;
 import retrofit2.converter.gson.GsonConverterFactory;
 
 /**
- * Created by le on 3/31/17.
+ * Created by wangsongtao on 2017/5/14.
  */
 @Module
-public class ApplicationModule {
+public class ApiModule {
 
-    Application mApplication;
-    GithubApi mApi;
-    String mApiToken;
-    SharedPreferences mSharedPreferences;
+    private GithubApiV3 mGithubApiV3;
+    private GithubApi mGithubApi;
+    private String mApiToken;
 
-    public ApplicationModule(Context context, String apiToken) {
-        mApplication = (Application) context.getApplicationContext();
+    public ApiModule() {
+    }
+
+    public void initApiAccessToken(String apiToken) {
         mApiToken = apiToken;
+        SLog.d("ApiModule initApiAccessToken:" + apiToken);
+        SLog.d("ApiModule initApiAccessToken mGithubApiV3 before init:" + mGithubApiV3);
+        mGithubApiV3 = createApiV3();
+        SLog.d("ApiModule initApiAccessToken mGithubApiV3 after init :" + mGithubApiV3);
     }
 
     @Singleton
     @Provides
-    public GithubApi provideApi() {
-        if (mApi == null) {
+    public GithubApiV3 provideGithubApiV3() {
+        SLog.d("ApiModule provideGithubApiV3 mGithubApiV3 " + mGithubApiV3);
+
+        if (mGithubApiV3 == null) {
+            mGithubApiV3 = createApiV3();
+        }
+
+        return mGithubApiV3;
+    }
+
+    private GithubApiV3 createApiV3() {
+        OkHttpClient.Builder builder = new OkHttpClient.Builder();
+        HttpLoggingInterceptor interceptor = new HttpLoggingInterceptor();
+        interceptor.setLevel(HttpLoggingInterceptor.Level.BASIC);
+        builder.addInterceptor(interceptor);
+        if (mApiToken != null) {
+            builder.addInterceptor(new HeaderInterceptor(mApiToken));
+        }
+        GsonBuilder gsonBuilder = new GsonBuilder().setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES);
+        Retrofit retrofit = new Retrofit.Builder()
+                .baseUrl("https://api.github.com/")
+                .addConverterFactory(GsonConverterFactory.create(gsonBuilder.create()))
+                .addCallAdapterFactory(RxJava2CallAdapterFactory.createAsync())
+                .client(builder.build())
+                .build();
+        return retrofit.create(GithubApiV3.class);
+    }
+
+    @Singleton
+    @Provides
+    public GithubApi provideGithubApi() {
+        if (mGithubApi == null) {
             OkHttpClient.Builder builder = new OkHttpClient.Builder();
             HttpLoggingInterceptor interceptor = new HttpLoggingInterceptor();
             interceptor.setLevel(HttpLoggingInterceptor.Level.BASIC);
             builder.addInterceptor(interceptor);
-            if (mApiToken != null) {
-                builder.addInterceptor(new HeaderInterceptor(mApiToken));
-            }
+            builder.addInterceptor(new Interceptor() {
+                @Override
+                public Response intercept(Chain chain) throws IOException {
+                    Request request = chain.request()
+                            .newBuilder()
+                            .addHeader("Accept", "application/json")
+                            .addHeader("User-Agent", "Gitclub-App")
+                            .build();
+                    return chain.proceed(request);
+                }
+            });
             GsonBuilder gsonBuilder = new GsonBuilder().setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES);
             Retrofit retrofit = new Retrofit.Builder()
-                    .baseUrl("https://api.github.com/")
+                    .baseUrl("https://github.com/")
                     .addConverterFactory(GsonConverterFactory.create(gsonBuilder.create()))
                     .addCallAdapterFactory(RxJava2CallAdapterFactory.createAsync())
                     .client(builder.build())
                     .build();
-            mApi = retrofit.create(GithubApi.class);
+            mGithubApi = retrofit.create(GithubApi.class);
         }
-        return mApi;
+        return mGithubApi;
     }
 
-    @Singleton
-    @Provides
-    public Context provideApplicationContext() {
-        return mApplication;
-    }
 
-    @Singleton
-    @Provides
-    public SharedPreferences provideSharedPreferences() {
-        if (mSharedPreferences == null) {
-            mSharedPreferences = mApplication.getSharedPreferences("gitclub", Context.MODE_PRIVATE);
-        }
-        return mSharedPreferences;
-    }
-
-    public static class HeaderInterceptor implements Interceptor {
+    static class HeaderInterceptor implements Interceptor {
 
         String mToken;
 
@@ -112,5 +135,4 @@ public class ApplicationModule {
             return chain.proceed(request);
         }
     }
-
 }
