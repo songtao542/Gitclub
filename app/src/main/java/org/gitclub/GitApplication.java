@@ -40,8 +40,4 @@ public class GitApplication extends Application {
         return mAppComponent;
     }
 
-    public void initApiAccessToken(String email, AccessToken token) {
-        mAccessTokenStore.setAccessToken(email, token);
-    }
-
 }

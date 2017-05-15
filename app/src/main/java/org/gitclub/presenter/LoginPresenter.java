@@ -14,6 +14,7 @@ import android.webkit.WebView;
 import android.webkit.WebViewClient;
 
 import org.gitclub.data.AccessTokenAccessor;
+import org.gitclub.data.AccessTokenStore;
 import org.gitclub.model.AccessToken;
 import org.gitclub.model.Scopes;
 import org.gitclub.net.Api;
@@ -44,6 +45,7 @@ public class LoginPresenter implements Presenter {
 
     private GithubApi mGithubApi;
     private Api mApi;
+    private AccessTokenStore mAccessTokenStore;
 
     private WebView mWebView;
 
@@ -58,14 +60,12 @@ public class LoginPresenter implements Presenter {
     private String mUsername;
     private String mPassword;
 
-    private AccessTokenAccessor mAccessTokenAccessor;
-
     @Inject
-    public LoginPresenter(Context context, Api api, SharedPreferences sharedPreferences, AccessTokenAccessor accessTokenAccessor) {
+    public LoginPresenter(Context context, Api api, SharedPreferences sharedPreferences, AccessTokenStore accessTokenStore) {
         mContext = context;
         mApi = api;
+        mAccessTokenStore = accessTokenStore;
         mSharedPreferences = sharedPreferences;
-        mAccessTokenAccessor = accessTokenAccessor;
         mWebView = new WebView(context);
         configWebView();
     }
@@ -254,7 +254,8 @@ public class LoginPresenter implements Presenter {
         editor.commit();
 
         //mContext.getContentResolver().insert(GitclubContent.AccessToken.CONTENT_URI, accessToken.toContentValues());
-        mAccessTokenAccessor.insertOrUpdateByEmail(accessToken);
+        mAccessTokenStore.insertOrUpdateByEmail(accessToken);
+        mAccessTokenStore.storeAccessToken(accessToken.email, accessToken);
         if (mLoginView != null) {
             mLoginView.accessToken(accessToken);
         }

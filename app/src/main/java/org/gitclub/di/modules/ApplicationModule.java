@@ -70,9 +70,9 @@ public class ApplicationModule {
 
     @Singleton
     @Provides
-    public AccessTokenStore accessTokenStore(AccessTokenAccessor accessTokenAccessor) {
+    public AccessTokenStore accessTokenStore(Context context) {
         if (mAccessTokenStore == null) {
-            mAccessTokenStore = new AccessTokenStore(accessTokenAccessor);
+            mAccessTokenStore = new AccessTokenStore(context);
         }
         return mAccessTokenStore;
     }

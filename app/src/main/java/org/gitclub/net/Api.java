@@ -26,17 +26,12 @@ import retrofit2.converter.gson.GsonConverterFactory;
 public class Api {
 
     private AccessTokenStore mAccessTokenStore;
-    private String mUserEmail;
 
     private GithubApi mGithubApi;
     private GithubApiV3 mGithubApiV3;
 
     public Api(AccessTokenStore accessTokenStore) {
         mAccessTokenStore = accessTokenStore;
-    }
-
-    public void setUserEmail(String email) {
-        mUserEmail = email;
     }
 
     public GithubApiV3 getGithubApiV3() {
@@ -48,14 +43,17 @@ public class Api {
     }
 
     private GithubApiV3 createApiV3() {
-        if (mUserEmail != null && mGithubApiV3 != null) {
+        if (mGithubApiV3 != null) {
             return mGithubApiV3;
         }
         OkHttpClient.Builder builder = new OkHttpClient.Builder();
         HttpLoggingInterceptor interceptor = new HttpLoggingInterceptor();
         interceptor.setLevel(HttpLoggingInterceptor.Level.BASIC);
         builder.addInterceptor(interceptor);
-        AccessToken token = mAccessTokenStore.getAccessToken(mUserEmail);
+        AccessToken token = mAccessTokenStore.getAccessToken();
+        if (token == null) {
+            throw new RuntimeException("AccessToken has not init.");
+        }
         builder.addInterceptor(new HeaderInterceptor(token.accessToken));
         GsonBuilder gsonBuilder = new GsonBuilder().setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES);
         Retrofit retrofit = new Retrofit.Builder()

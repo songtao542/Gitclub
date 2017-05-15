@@ -1,14 +1,19 @@
 package org.gitclub.presenter;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 
+import org.gitclub.GitApplication;
 import org.gitclub.data.AccessTokenAccessor;
+import org.gitclub.data.AccessTokenStore;
 import org.gitclub.data.UserAccessor;
+import org.gitclub.model.AccessToken;
 import org.gitclub.model.User;
 import org.gitclub.net.Api;
 import org.gitclub.net.GithubApi;
 import org.gitclub.net.GithubApiV3;
 import org.gitclub.ui.view.UserView;
+import org.gitclub.utils.SLog;
 
 import javax.inject.Inject;
 
@@ -30,33 +35,59 @@ public class UserPresenter implements Presenter {
     private UserView mUserView;
 
     private UserAccessor mUserAccessor;
-    private AccessTokenAccessor mAccessTokenAccessor;
+    private AccessTokenStore mAccessTokenStore;
+
+    private SharedPreferences mSharedPreferences;
 
     private String mEmailAddress;
 
     @Inject
-    public UserPresenter(Context context, Api api, UserAccessor userAccessor, AccessTokenAccessor accessTokenAccessor) {
+    public UserPresenter(Context context, Api api, UserAccessor userAccessor, SharedPreferences sharedPreferences, AccessTokenStore accessTokenStore) {
         mContext = context;
         mApi = api;
         mUserAccessor = userAccessor;
-        mAccessTokenAccessor = accessTokenAccessor;
+        mSharedPreferences = sharedPreferences;
+        mAccessTokenStore = accessTokenStore;
     }
 
     public void setUserView(UserView userView) {
         mUserView = userView;
     }
 
-    private GithubApiV3 ensureGithubApiV3(String email) {
+    private GithubApiV3 ensureGithubApiV3() {
         if (mGithubApiV3 == null) {
-            mApi.setUserEmail(email);
             mGithubApiV3 = mApi.getGithubApiV3();
         }
         return mGithubApiV3;
     }
 
-    public void getUser(String email) {
+    public boolean checkUser() {
+        mEmailAddress = mSharedPreferences.getString("login", null);
+        SLog.d("UserPresenter mEmailAddress=" + mEmailAddress);
+        if (mEmailAddress == null) {
+            return false;
+        } else {
+            AccessToken accessToken = mAccessTokenStore.getAccessToken(mEmailAddress);
+            SLog.d("UserPresenter accessToken=" + accessToken);
+            if (accessToken != null && accessToken.accessToken != null) {
+                mAccessTokenStore.storeAccessToken(mEmailAddress, accessToken);
+                return true;
+            } else {
+                return false;
+            }
+        }
+    }
+
+    public String getEmailAddress() {
+        return mEmailAddress;
+    }
+
+    public void setEmailAddress(String email) {
         mEmailAddress = email;
-        ensureGithubApiV3(mEmailAddress);
+    }
+
+    public void getUser() {
+        ensureGithubApiV3();
         mGithubApiV3.rxGetUser()
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
@@ -85,7 +116,7 @@ public class UserPresenter implements Presenter {
         }
         mUserAccessor.insertOrUpdateByEmail(user);
         long id = mUserAccessor.queryIdByEmail(user.email);
-        mAccessTokenAccessor.updateUserKeyByEmail(user.email, id);
+        mAccessTokenStore.updateUserKeyByEmail(user.email, id);
     }
 
     @Override

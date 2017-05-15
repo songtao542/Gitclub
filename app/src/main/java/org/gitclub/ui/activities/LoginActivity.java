@@ -126,7 +126,6 @@ public class LoginActivity extends BaseActivity implements LoaderCallbacks<Curso
 
     @Override
     public void accessToken(AccessToken accessToken) {
-        ((GitApplication) getApplication()).initApiAccessToken(accessToken.email, accessToken);
         intentToMain(accessToken.email);
     }
 

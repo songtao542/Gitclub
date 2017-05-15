@@ -52,11 +52,6 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
     }
 
     @Inject
-    SharedPreferences mSharedPreferences;
-    @Inject
-    AccessTokenAccessor mAccessTokenAccessor;
-
-    @Inject
     UserPresenter mUserPresenter;
 
     @BindView(R.id.drawer_layout)
@@ -68,32 +63,21 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
     //    @BindView(R.id.useremail)
     protected TextView mUserEmail;
 
-    private String mEmailAddress;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         DaggerMainActivity_Component.builder().applicationComponent(getApplicationComponent()).build().inject(this);
 
-        mEmailAddress = getIntent().getStringExtra("EXTRA_EMAIL");
-        SLog.d("mEmailAddress extra=" + mEmailAddress);
-        if (TextUtils.isEmpty(mEmailAddress)) {
-            mEmailAddress = mSharedPreferences.getString("login", null);
-            SLog.d("mEmailAddress=" + mEmailAddress);
-            if (mEmailAddress == null) {
+        String emailAddress = getIntent().getStringExtra("EXTRA_EMAIL");
+        SLog.d("mEmailAddress extra=" + emailAddress);
+        if (TextUtils.isEmpty(emailAddress)) {
+            if (!mUserPresenter.checkUser()) {
                 intentToLogin();
                 return;
-            } else {
-                AccessToken accessToken = mAccessTokenAccessor.queryByEmail(mEmailAddress);
-                SLog.d("MainActivity accessToken=" + accessToken);
-                if (accessToken != null && accessToken.accessToken != null) {
-                    ((GitApplication) getApplication()).initApiAccessToken(mEmailAddress, accessToken);
-                } else {
-                    intentToLogin();
-                    return;
-                }
             }
+        } else {
+            mUserPresenter.setEmailAddress(emailAddress);
         }
 
         setContentView(R.layout.activity_main);
@@ -178,7 +162,7 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
 
             @Override
             public User loadInBackground() {
-                String emailAddress = mEmailAddress;
+                String emailAddress = mUserPresenter.getEmailAddress();
                 if (emailAddress == null) {
                     emailAddress = getIntent().getStringExtra("EXTRA_EMAIL");
                 }
@@ -190,7 +174,7 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
                     if (users != null && users.size() > 0) {
                         return users.get(0);
                     } else {
-                        mUserPresenter.getUser(mEmailAddress);
+                        mUserPresenter.getUser();
                     }
                 }
                 return null;

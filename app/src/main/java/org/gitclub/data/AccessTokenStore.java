@@ -1,5 +1,7 @@
 package org.gitclub.data;
 
+import android.content.Context;
+
 import org.gitclub.model.AccessToken;
 
 import java.util.HashMap;
@@ -9,19 +11,23 @@ import java.util.HashMap;
  */
 
 
-public class AccessTokenStore {
+public class AccessTokenStore extends AccessTokenAccessor {
 
-    HashMap<String, AccessToken> store = new HashMap<>();
+    private HashMap<String, AccessToken> store = new HashMap<>();
+    private String mUserEmail;
+    private AccessToken mAccessToken;
 
-    AccessTokenAccessor mAccessTokenAccessor;
-
-    public AccessTokenStore(AccessTokenAccessor accessTokenAccessor) {
-        mAccessTokenAccessor = accessTokenAccessor;
+    public AccessTokenStore(Context context) {
+        super(context);
     }
 
+    /**
+     * @param email
+     * @return
+     */
     public AccessToken getAccessToken(String email) {
         if (store.get(email) == null) {
-            AccessToken accessToken = mAccessTokenAccessor.queryByEmail(email);
+            AccessToken accessToken = queryByEmail(email);
             if (accessToken != null) {
                 store.put(email, accessToken);
             }
@@ -29,9 +35,27 @@ public class AccessTokenStore {
         return store.get(email);
     }
 
-    public void setAccessToken(String email, AccessToken accessToken) {
+    /**
+     * @return The latest AccessToken.
+     */
+    public AccessToken getAccessToken() {
+        return mAccessToken;
+    }
+
+    /**
+     * @return
+     */
+    public String getEmailAddress() {
+        return mUserEmail;
+    }
+
+    public void storeAccessToken(String email, AccessToken accessToken) {
         if (accessToken != null) {
+            mUserEmail = email;
+            mAccessToken = accessToken;
             store.put(email, accessToken);
         }
     }
+
+
 }
