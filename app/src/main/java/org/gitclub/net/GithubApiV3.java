@@ -3,6 +3,7 @@ package org.gitclub.net;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 
+import org.gitclub.model.Repository;
 import org.gitclub.model.User;
 
 import java.util.ArrayList;
@@ -78,6 +79,6 @@ public interface GithubApiV3 {
                                           @Query("fingerprint") String fingerprint);
 
     @GET("/user/repos")
-    Observable<JsonArray> rxrepos();
+    Observable<ArrayList<Repository>> rxrepos();
 
 }

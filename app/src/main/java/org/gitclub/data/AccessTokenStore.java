@@ -26,13 +26,12 @@ public class AccessTokenStore extends AccessTokenAccessor {
      * @return
      */
     public AccessToken getAccessToken(String email) {
-        if (store.get(email) == null) {
-            AccessToken accessToken = queryByEmail(email);
-            if (accessToken != null) {
-                store.put(email, accessToken);
-            }
+        AccessToken accessToken = store.get(email);
+        if (accessToken == null) {
+            accessToken = queryByEmail(email);
+            storeAccessToken(email, accessToken);
         }
-        return store.get(email);
+        return accessToken;
     }
 
     /**

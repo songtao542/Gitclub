@@ -10,6 +10,10 @@ public class SLog {
 
     private static final String TAG = "GITCLUB";
 
+    public static void d(Object invoker, String msg) {
+        d(TAG, invoker.getClass().getSimpleName() + ": " + msg);
+    }
+
     public static void d(String msg) {
         d(TAG, msg);
     }

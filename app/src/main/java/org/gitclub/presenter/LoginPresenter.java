@@ -218,14 +218,6 @@ public class LoginPresenter implements Presenter {
         mGithubApi.rxAccessToken(GithubApi.CLIENT_ID, GithubApi.CLIENT_SECRET, code)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .doOnError(new Consumer<Throwable>() {
-                    @Override
-                    public void accept(@NonNull Throwable throwable) throws Exception {
-                        if (mLoginView != null) {
-                            mLoginView.showError(throwable.getMessage());
-                        }
-                    }
-                })
                 .subscribe(new Consumer<AccessToken>() {
                     @Override
                     public void accept(@NonNull final AccessToken accessToken) throws Exception {
@@ -239,6 +231,13 @@ public class LoginPresenter implements Presenter {
                             }
                         } else {
                             SLog.d("response accessToken is null");
+                        }
+                    }
+                }, new Consumer<Throwable>() {
+                    @Override
+                    public void accept(@NonNull Throwable throwable) throws Exception {
+                        if (mLoginView != null) {
+                            mLoginView.showError(throwable.getMessage());
                         }
                     }
                 });

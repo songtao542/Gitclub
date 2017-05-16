@@ -1,12 +1,12 @@
 package org.gitclub.ui.activities;
 
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.content.UriMatcher;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.design.widget.NavigationView;
+import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.AsyncTaskLoader;
@@ -15,35 +15,35 @@ import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.widget.Toolbar;
-import android.text.TextUtils;
 import android.view.MenuItem;
 import android.widget.TextView;
 
 import com.facebook.drawee.view.SimpleDraweeView;
 
-import org.gitclub.GitApplication;
 import org.gitclub.R;
-import org.gitclub.data.AccessTokenAccessor;
 import org.gitclub.di.ActivityScope;
 import org.gitclub.di.components.ApplicationComponent;
-import org.gitclub.model.AccessToken;
 import org.gitclub.model.User;
 import org.gitclub.presenter.UserPresenter;
 import org.gitclub.provider.GitclubContent;
+import org.gitclub.ui.fragments.BaseFragment;
+import org.gitclub.ui.fragments.GistFragment;
+import org.gitclub.ui.fragments.IssuesFragment;
 import org.gitclub.ui.fragments.ProfileFragment;
+import org.gitclub.ui.fragments.PullRequestsFragment;
+import org.gitclub.ui.fragments.StarsFragment;
 import org.gitclub.ui.view.UserView;
 import org.gitclub.utils.SLog;
 
 import java.util.ArrayList;
+import java.util.WeakHashMap;
 
 import javax.inject.Inject;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
-import dagger.Subcomponent;
-import dagger.android.AndroidInjector;
 
-public class MainActivity extends BaseActivity implements NavigationView.OnNavigationItemSelectedListener, LoaderManager.LoaderCallbacks<User>, ProfileFragment.OnFragmentInteractionListener, UserView {
+public class MainActivity extends BaseActivity implements NavigationView.OnNavigationItemSelectedListener, LoaderManager.LoaderCallbacks<User>, BaseFragment.OnFragmentInteractionListener, UserView {
 
     @ActivityScope
     @dagger.Component(dependencies = {ApplicationComponent.class})
@@ -63,21 +63,24 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
     //    @BindView(R.id.useremail)
     protected TextView mUserEmail;
 
+    private WeakHashMap<String, Fragment> mCachedFragments = new WeakHashMap<>();
+    private Fragment mCurrentFragment;
+
+    private static final String TAG_PROFILE = "profile";
+    private static final String TAG_GIST = "gist";
+    private static final String TAG_STARS = "stars";
+    private static final String TAG_PULL_REQUESTS = "pullrequests";
+    private static final String TAG_ISSUES = "issues";
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         DaggerMainActivity_Component.builder().applicationComponent(getApplicationComponent()).build().inject(this);
 
-        String emailAddress = getIntent().getStringExtra("EXTRA_EMAIL");
-        SLog.d("mEmailAddress extra=" + emailAddress);
-        if (TextUtils.isEmpty(emailAddress)) {
-            if (!mUserPresenter.checkUser()) {
-                intentToLogin();
-                return;
-            }
-        } else {
-            mUserPresenter.setEmailAddress(emailAddress);
+        if (!mUserPresenter.hasLoginUser()) {
+            intentToLogin();
+            return;
         }
 
         setContentView(R.layout.activity_main);
@@ -99,10 +102,35 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
         mUserHead = (SimpleDraweeView) navigationView.getHeaderView(0).findViewById(R.id.userhead);
         mUserName = (TextView) navigationView.getHeaderView(0).findViewById(R.id.username);
         mUserEmail = (TextView) navigationView.getHeaderView(0).findViewById(R.id.useremail);
-        SLog.d("initLoader");
+        SLog.d(this, "initLoader");
         getSupportLoaderManager().initLoader(0, null, this);
 
         mUserPresenter.setUserView(this);
+
+        navigationView.setCheckedItem(R.id.nav_profile);
+        transactionTo(TAG_PROFILE);
+    }
+
+    private void transactionTo(String tag) {
+        mCurrentFragment = mCachedFragments.get(tag);
+        if (mCurrentFragment == null) {
+            if (tag == TAG_PROFILE) {
+                mCurrentFragment = ProfileFragment.newInstance();
+            } else if (tag == TAG_STARS) {
+                mCurrentFragment = StarsFragment.newInstance();
+            } else if (tag == TAG_GIST) {
+                mCurrentFragment = GistFragment.newInstance();
+            } else if (tag == TAG_PULL_REQUESTS) {
+                mCurrentFragment = PullRequestsFragment.newInstance();
+            } else if (tag == TAG_ISSUES) {
+                mCurrentFragment = IssuesFragment.newInstance();
+            }
+        }
+        mCachedFragments.put(tag, mCurrentFragment);
+        FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
+        SLog.d(this, "transactionTo " + tag);
+        ft.replace(R.id.contentRoot, mCurrentFragment, tag);
+        ft.commit();
     }
 
 
@@ -135,16 +163,30 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
         int id = item.getItemId();
 
         if (id == R.id.nav_profile) {
-            FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
-
-            ft.add(R.id.contentRoot, ProfileFragment.newInstance());
-            ft.commit();
+            SLog.d(this, "nav_profile click,current tag = " + mCurrentFragment.getTag());
+            if (!TAG_PROFILE.equals(mCurrentFragment.getTag())) {
+                transactionTo(TAG_PROFILE);
+            }
         } else if (id == R.id.nav_stars) {
-
+            SLog.d(this, "nav_stars click,current tag = " + mCurrentFragment.getTag());
+            if (!TAG_STARS.equals(mCurrentFragment.getTag())) {
+                transactionTo(TAG_STARS);
+            }
         } else if (id == R.id.nav_gist) {
-
+            SLog.d(this, "nav_gist click,current tag = " + mCurrentFragment.getTag());
+            if (!TAG_GIST.equals(mCurrentFragment.getTag())) {
+                transactionTo(TAG_GIST);
+            }
         } else if (id == R.id.nav_pull_requests) {
-
+            SLog.d(this, "nav_pull_requests click,current tag = " + mCurrentFragment.getTag());
+            if (!TAG_PULL_REQUESTS.equals(mCurrentFragment.getTag())) {
+                transactionTo(TAG_PULL_REQUESTS);
+            }
+        } else if (id == R.id.nav_issues) {
+            SLog.d(this, "nav_issues click,current tag = " + mCurrentFragment.getTag());
+            if (!TAG_ISSUES.equals(mCurrentFragment.getTag())) {
+                transactionTo(TAG_ISSUES);
+            }
         } else if (id == R.id.nav_share) {
 
         } else if (id == R.id.nav_send) {

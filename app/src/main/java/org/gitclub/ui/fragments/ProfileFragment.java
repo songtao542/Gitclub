@@ -12,7 +12,16 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import org.gitclub.R;
+import org.gitclub.di.ActivityScope;
+import org.gitclub.di.components.ApplicationComponent;
+import org.gitclub.model.Repository;
+import org.gitclub.presenter.ProfilePresenter;
 import org.gitclub.ui.adapter.ProfileOverviewAdapter;
+import org.gitclub.ui.view.ProfileView;
+
+import java.util.List;
+
+import javax.inject.Inject;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -25,15 +34,16 @@ import butterknife.ButterKnife;
  * Use the {@link ProfileFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class ProfileFragment extends Fragment {
-    // TODO: Rename parameter arguments, choose names that match
-    // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-    private static final String ARG_PARAM1 = "param1";
-    private static final String ARG_PARAM2 = "param2";
+public class ProfileFragment extends BaseFragment implements ProfileView {
 
-    // TODO: Rename and change types of parameters
-    private String mParam1;
-    private String mParam2;
+    @ActivityScope
+    @dagger.Component(dependencies = {ApplicationComponent.class})
+    public interface Component {
+        void inject(ProfileFragment fragment);
+    }
+
+    @Inject
+    ProfilePresenter mProfilePresenter;
 
     @BindView(R.id.recyclerView)
     RecyclerView mRecyclerView;
@@ -48,22 +58,10 @@ public class ProfileFragment extends Fragment {
 
     /**
      * Use this factory method to create a new instance of
-     * this fragment using the provided parameters.
+     * this fragment .
      *
-     * @param param1 Parameter 1.
-     * @param param2 Parameter 2.
      * @return A new instance of fragment ProfileFragment.
      */
-    // TODO: Rename and change types and number of parameters
-    public static ProfileFragment newInstance(String param1, String param2) {
-        ProfileFragment fragment = new ProfileFragment();
-        Bundle args = new Bundle();
-        args.putString(ARG_PARAM1, param1);
-        args.putString(ARG_PARAM2, param2);
-        fragment.setArguments(args);
-        return fragment;
-    }
-
     public static ProfileFragment newInstance() {
         ProfileFragment fragment = new ProfileFragment();
         Bundle args = new Bundle();
@@ -74,10 +72,6 @@ public class ProfileFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if (getArguments() != null) {
-            mParam1 = getArguments().getString(ARG_PARAM1);
-            mParam2 = getArguments().getString(ARG_PARAM2);
-        }
     }
 
     @Override
@@ -92,10 +86,14 @@ public class ProfileFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
         ButterKnife.bind(this, view);
 
+        DaggerProfileFragment_Component.builder().applicationComponent(getApplicationComponent()).build().inject(this);
+
         mProfileOverviewAdapter = new ProfileOverviewAdapter();
 
         mRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
         mRecyclerView.setAdapter(mProfileOverviewAdapter);
+
+        mProfilePresenter.getRepos();
     }
 
     // TODO: Rename method, update argument and hook method into UI event
@@ -122,18 +120,39 @@ public class ProfileFragment extends Fragment {
         mListener = null;
     }
 
-    /**
-     * This interface must be implemented by activities that contain this
-     * fragment to allow an interaction in this fragment to be communicated
-     * to the activity and potentially other fragments contained in that
-     * activity.
-     * <p>
-     * See the Android Training lesson <a href=
-     * "http://developer.android.com/training/basics/fragments/communicating.html"
-     * >Communicating with Other Fragments</a> for more information.
-     */
-    public interface OnFragmentInteractionListener {
-        // TODO: Update argument type and name
-        void onFragmentInteraction(Uri uri);
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        mProfilePresenter = null;
+    }
+
+    @Override
+    public void profile(List<Repository> repos) {
+
+    }
+
+    @Override
+    public void showLoading() {
+
+    }
+
+    @Override
+    public void hideLoading() {
+
+    }
+
+    @Override
+    public void showRetry() {
+
+    }
+
+    @Override
+    public void hideRetry() {
+
+    }
+
+    @Override
+    public void showError(String message) {
+
     }
 }

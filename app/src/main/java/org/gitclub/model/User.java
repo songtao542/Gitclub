@@ -12,7 +12,7 @@ import java.util.ArrayList;
  * Created by le on 3/31/17.
  */
 
-public class User {
+public class User extends Model {
     public long _id;
     public String login;
     public long id;// 5105572,
@@ -147,20 +147,5 @@ public class User {
             cursor.close();
         }
         return users;
-    }
-
-    @Override
-    public String toString() {
-        Field[] fields = User.class.getDeclaredFields();
-        StringBuilder builder = new StringBuilder("{\n");
-        try {
-            for (Field f : fields) {
-                builder.append(f.getName() + ":" + f.get(this) + "\n");
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        builder.append("}");
-        return builder.toString();
     }
 }

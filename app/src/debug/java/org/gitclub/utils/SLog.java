@@ -15,6 +15,10 @@ public class SLog {
         d(TAG, msg);
     }
 
+    public static void d(Object invoker, String msg) {
+        d(TAG, invoker.getClass().getSimpleName() + ": " + msg);
+    }
+
     public static void d(String tag, String msg) {
         if (tag == null) {
             tag = TAG;

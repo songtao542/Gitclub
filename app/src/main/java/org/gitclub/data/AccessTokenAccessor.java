@@ -25,8 +25,8 @@ public class AccessTokenAccessor extends Accessor {
         super(context);
     }
 
-    public void save(AccessToken accessToken) {
-        insert(GitclubContent.AccessToken.CONTENT_URI, accessToken.toContentValues());
+    public Uri save(AccessToken accessToken) {
+        return insert(GitclubContent.AccessToken.CONTENT_URI, accessToken.toContentValues());
     }
 
     public void insertOrUpdateByEmail(AccessToken accessToken) {

@@ -61,21 +61,21 @@ public class UserPresenter implements Presenter {
         return mGithubApiV3;
     }
 
-    public boolean checkUser() {
-        mEmailAddress = mSharedPreferences.getString("login", null);
-        SLog.d("UserPresenter mEmailAddress=" + mEmailAddress);
+    public boolean hasLoginUser() {
+        mEmailAddress = mAccessTokenStore.getEmailAddress();
         if (mEmailAddress == null) {
-            return false;
-        } else {
+            mEmailAddress = mSharedPreferences.getString("login", null);
+        }
+        SLog.d("UserPresenter mEmailAddress=" + mEmailAddress);
+        if (mEmailAddress != null) {
             AccessToken accessToken = mAccessTokenStore.getAccessToken(mEmailAddress);
             SLog.d("UserPresenter accessToken=" + accessToken);
             if (accessToken != null && accessToken.accessToken != null) {
                 mAccessTokenStore.storeAccessToken(mEmailAddress, accessToken);
                 return true;
-            } else {
-                return false;
             }
         }
+        return false;
     }
 
     public String getEmailAddress() {
@@ -91,20 +91,19 @@ public class UserPresenter implements Presenter {
         mGithubApiV3.rxGetUser()
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .doOnError(new Consumer<Throwable>() {
-                    @Override
-                    public void accept(@NonNull Throwable throwable) throws Exception {
-                        if (mUserView != null) {
-                            mUserView.showError(throwable.getMessage());
-                        }
-                    }
-                })
                 .subscribe(new Consumer<User>() {
                     @Override
                     public void accept(@NonNull User user) throws Exception {
                         saveUser(user);
                         if (mUserView != null) {
                             mUserView.user(user);
+                        }
+                    }
+                }, new Consumer<Throwable>() {
+                    @Override
+                    public void accept(@NonNull Throwable throwable) throws Exception {
+                        if (mUserView != null) {
+                            mUserView.showError(throwable.getMessage());
                         }
                     }
                 });

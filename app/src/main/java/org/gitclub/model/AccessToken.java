@@ -14,7 +14,7 @@ import java.util.ArrayList;
  * Created by le on 5/9/17.
  */
 
-public class AccessToken {
+public class AccessToken extends Model {
     //{"access_token":"b482e9061b6a6c32c3ac72dd0cd94ed6093bb887","token_type":"bearer","scope":"user:email"}
     public long id;
     public long userId;
@@ -54,21 +54,5 @@ public class AccessToken {
             cursor.close();
         }
         return tokens;
-    }
-
-    @Override
-    public String toString() {
-        Field[] fields = getClass().getDeclaredFields();
-        StringBuilder builder = new StringBuilder("{\n");
-        try {
-            for (Field f : fields) {
-                f.setAccessible(true);
-                builder.append(f.getName() + ":" + f.get(this) + "\n");
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        builder.append("}");
-        return builder.toString();
     }
 }
