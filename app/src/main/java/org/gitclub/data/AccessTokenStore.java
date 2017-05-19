@@ -23,7 +23,7 @@ public class AccessTokenStore extends AccessTokenAccessor {
 
     /**
      * @param email
-     * @return
+     * @return AccessToken or null.
      */
     public AccessToken getAccessToken(String email) {
         AccessToken accessToken = store.get(email);
@@ -35,19 +35,25 @@ public class AccessTokenStore extends AccessTokenAccessor {
     }
 
     /**
-     * @return The latest AccessToken.
+     * @return The latest stored AccessToken.
      */
     public AccessToken getAccessToken() {
         return mAccessToken;
     }
 
     /**
-     * @return
+     * @return The latest stored Email Address.
      */
     public String getEmailAddress() {
         return mUserEmail;
     }
 
+    /**
+     * Store the email address and token;Update the latest email address and token.
+     *
+     * @param email
+     * @param accessToken
+     */
     public void storeAccessToken(String email, AccessToken accessToken) {
         if (accessToken != null) {
             mUserEmail = email;

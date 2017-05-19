@@ -13,13 +13,11 @@ import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 
-import org.gitclub.data.AccessTokenAccessor;
 import org.gitclub.data.AccessTokenStore;
 import org.gitclub.model.AccessToken;
 import org.gitclub.model.Scopes;
 import org.gitclub.net.Api;
 import org.gitclub.net.GithubApi;
-import org.gitclub.provider.GitclubContent;
 import org.gitclub.ui.view.LoginView;
 import org.gitclub.utils.SLog;
 
@@ -91,12 +89,12 @@ public class LoginPresenter implements Presenter {
             @Override
             public void onPageStarted(WebView view, String url, Bitmap favicon) {
                 mLoadCounter++;
-                SLog.d("onPageStarted url:" + url);
+                SLog.d(LoginPresenter.this, "onPageStarted url:" + url);
                 String prefix = "http://localhost:4567/callback?code=";
                 if (url.startsWith(prefix)) {
                     mCode = url.substring(prefix.length());
-                    SLog.d("onPageStarted mCode:" + mCode);
-                    accessToken(mCode);
+                    SLog.d(LoginPresenter.this, "onPageStarted mCode:" + mCode);
+                    getAccessToken(mCode);
                 } else if (view.getTitle().contains("Authorize GitClub")) {
                     needAuthorize();
                 }
@@ -108,7 +106,7 @@ public class LoginPresenter implements Presenter {
                 //view.loadUrl("javascript:window.local.showSource('<html>'+document.getElementsByTagName('html')[0].innerHTML+'</html>');");
 
                 if (url.startsWith(LOGIN_MATCH_URL)) {
-                    SLog.d("login page is ready");
+                    SLog.d(LoginPresenter.this, "login page is ready");
                     mIsReady = true;
                     hiddenHeader();
 
@@ -134,7 +132,7 @@ public class LoginPresenter implements Presenter {
 
             @Override
             public void onReceivedError(WebView view, WebResourceRequest request, WebResourceError error) {
-                SLog.d("onReceivedError error:" + error);
+                SLog.d(LoginPresenter.this, "onReceivedError error:" + error);
                 Uri uri = request != null ? request.getUrl() : null;
                 String url = uri != null ? uri.toString() : "";
                 String prefix = "http://localhost:4567/callback?code=";
@@ -147,7 +145,7 @@ public class LoginPresenter implements Presenter {
 
             @Override
             public void onReceivedHttpError(WebView view, WebResourceRequest request, WebResourceResponse errorResponse) {
-                SLog.d("onReceivedHttpError errorResponse:" + errorResponse);
+                SLog.d(LoginPresenter.this, "onReceivedHttpError errorResponse:" + errorResponse);
                 Uri uri = request != null ? request.getUrl() : null;
                 String url = uri != null ? uri.toString() : "";
                 String prefix = "http://localhost:4567/callback?code=";
@@ -213,7 +211,7 @@ public class LoginPresenter implements Presenter {
         return mGithubApi;
     }
 
-    private void accessToken(String code) {
+    private void getAccessToken(String code) {
         ensureGithubApi();
         mGithubApi.rxAccessToken(GithubApi.CLIENT_ID, GithubApi.CLIENT_SECRET, code)
                 .subscribeOn(Schedulers.io())
@@ -222,15 +220,15 @@ public class LoginPresenter implements Presenter {
                     @Override
                     public void accept(@NonNull final AccessToken accessToken) throws Exception {
                         if (accessToken != null) {
-                            SLog.d("response accessToken:" + accessToken.accessToken);
-                            SLog.d("response tokenType:" + accessToken.tokenType);
-                            SLog.d("response scope:" + accessToken.scope);
+                            SLog.d(LoginPresenter.this, "response getAccessToken:" + accessToken.accessToken);
+                            SLog.d(LoginPresenter.this, "response tokenType:" + accessToken.tokenType);
+                            SLog.d(LoginPresenter.this, "response scope:" + accessToken.scope);
                             saveAccessToken(mUsername, accessToken);
                             if (mLoginView != null) {
                                 mLoginView.hideLoading();
                             }
                         } else {
-                            SLog.d("response accessToken is null");
+                            SLog.d(LoginPresenter.this, "getAccessToken from github server failure");
                         }
                     }
                 }, new Consumer<Throwable>() {
@@ -246,13 +244,13 @@ public class LoginPresenter implements Presenter {
     private void saveAccessToken(String username, AccessToken accessToken) {
         accessToken.email = username;
 
-        SLog.d("saveUserAccessToken accessToken:" + accessToken + " username:" + username);
+        SLog.d(this, "saveUserAccessToken getAccessToken:" + accessToken + " username:" + username);
 
         SharedPreferences.Editor editor = mSharedPreferences.edit();
         editor.putString("login", username);
         editor.commit();
 
-        //mContext.getContentResolver().insert(GitclubContent.AccessToken.CONTENT_URI, accessToken.toContentValues());
+        //mContext.getContentResolver().insert(GitclubContent.AccessToken.CONTENT_URI, getAccessToken.toContentValues());
         mAccessTokenStore.insertOrUpdateByEmail(accessToken);
         mAccessTokenStore.storeAccessToken(accessToken.email, accessToken);
         if (mLoginView != null) {

@@ -66,10 +66,10 @@ public class UserPresenter implements Presenter {
         if (mEmailAddress == null) {
             mEmailAddress = mSharedPreferences.getString("login", null);
         }
-        SLog.d("UserPresenter mEmailAddress=" + mEmailAddress);
+        SLog.d(UserPresenter.this, "hasLoginUser email address=" + mEmailAddress);
         if (mEmailAddress != null) {
             AccessToken accessToken = mAccessTokenStore.getAccessToken(mEmailAddress);
-            SLog.d("UserPresenter accessToken=" + accessToken);
+            SLog.d(UserPresenter.this, "accessToken=" + accessToken);
             if (accessToken != null && accessToken.accessToken != null) {
                 mAccessTokenStore.storeAccessToken(mEmailAddress, accessToken);
                 return true;
@@ -82,9 +82,6 @@ public class UserPresenter implements Presenter {
         return mEmailAddress;
     }
 
-    public void setEmailAddress(String email) {
-        mEmailAddress = email;
-    }
 
     public void getUser() {
         ensureGithubApiV3();
@@ -102,6 +99,7 @@ public class UserPresenter implements Presenter {
                 }, new Consumer<Throwable>() {
                     @Override
                     public void accept(@NonNull Throwable throwable) throws Exception {
+                        SLog.d(UserPresenter.this, "getUser from github server failure");
                         if (mUserView != null) {
                             mUserView.showError(throwable.getMessage());
                         }
@@ -110,11 +108,12 @@ public class UserPresenter implements Presenter {
     }
 
     private void saveUser(User user) {
+        SLog.d(UserPresenter.this, "saveUser to database user=" + user);
         if (user.email == null) {
             user.email = mEmailAddress;
         }
         mUserAccessor.insertOrUpdateByEmail(user);
-        long id = mUserAccessor.queryIdByEmail(user.email);
+        long id = mUserAccessor.queryKeyByEmail(user.email);
         mAccessTokenStore.updateUserKeyByEmail(user.email, id);
     }
 

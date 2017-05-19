@@ -25,10 +25,10 @@ public class AccessTokenAccessor extends Accessor {
         super(context);
     }
 
-    public Uri save(AccessToken accessToken) {
-        return insert(GitclubContent.AccessToken.CONTENT_URI, accessToken.toContentValues());
-    }
-
+    /**
+     * @param accessToken
+     * @return true if insertOrUpdate success, otherwise false
+     */
     public boolean insertOrUpdateByEmail(AccessToken accessToken) {
         ArrayList<AccessToken> tokens = AccessToken.fromCursor(query(GitclubContent.AccessToken.CONTENT_URI, null, GitclubContent.AccessTokenColumns.USER_EMAIL + "=?", new String[]{accessToken.email}, null));
         String selection = null;
@@ -40,6 +40,12 @@ public class AccessTokenAccessor extends Accessor {
         return insertOrUpdate(accessToken, selection, selectionArgs);
     }
 
+    /**
+     * @param accessToken
+     * @param selection
+     * @param selectionArgs
+     * @return true if insertOrUpdate success, otherwise false
+     */
     public boolean insertOrUpdate(AccessToken accessToken, String selection, String[] selectionArgs) {
         if (selection != null && selection.length() > 0) {
             int rows = update(GitclubContent.AccessToken.CONTENT_URI, accessToken.toContentValues(), selection, selectionArgs);
@@ -57,6 +63,11 @@ public class AccessTokenAccessor extends Accessor {
         return false;
     }
 
+    /**
+     * @param email
+     * @param userKey
+     * @return true if update success, otherwise false
+     */
     public boolean updateUserKeyByEmail(String email, long userKey) {
         if (email != null && userKey >= 0) {
             AccessToken accessToken = queryByEmail(email);
@@ -71,6 +82,10 @@ public class AccessTokenAccessor extends Accessor {
         return false;
     }
 
+    /**
+     * @param email
+     * @return A AccessToken or null.
+     */
     public AccessToken queryByEmail(String email) {
         SLog.d("queryByEmail email=" + email);
         if (email == null) {
