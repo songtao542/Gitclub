@@ -29,7 +29,7 @@ public class AccessTokenAccessor extends Accessor {
         return insert(GitclubContent.AccessToken.CONTENT_URI, accessToken.toContentValues());
     }
 
-    public void insertOrUpdateByEmail(AccessToken accessToken) {
+    public boolean insertOrUpdateByEmail(AccessToken accessToken) {
         ArrayList<AccessToken> tokens = AccessToken.fromCursor(query(GitclubContent.AccessToken.CONTENT_URI, null, GitclubContent.AccessTokenColumns.USER_EMAIL + "=?", new String[]{accessToken.email}, null));
         String selection = null;
         String[] selectionArgs = null;
@@ -37,25 +37,38 @@ public class AccessTokenAccessor extends Accessor {
             selection = GitclubContent.AccessTokenColumns._ID + "=?";
             selectionArgs = new String[]{String.valueOf(tokens.get(0).id)};
         }
-        insertOrUpdate(accessToken, selection, selectionArgs);
+        return insertOrUpdate(accessToken, selection, selectionArgs);
     }
 
-    public void insertOrUpdate(AccessToken accessToken, String selection, String[] selectionArgs) {
+    public boolean insertOrUpdate(AccessToken accessToken, String selection, String[] selectionArgs) {
         if (selection != null && selection.length() > 0) {
-            update(GitclubContent.AccessToken.CONTENT_URI, accessToken.toContentValues(), selection, selectionArgs);
+            int rows = update(GitclubContent.AccessToken.CONTENT_URI, accessToken.toContentValues(), selection, selectionArgs);
+            SLog.d(this, "insertOrUpdate->update rows=" + rows);
+            if (rows > 0) {
+                return true;
+            }
         } else {
-            insert(GitclubContent.AccessToken.CONTENT_URI, accessToken.toContentValues());
+            Uri uri = insert(GitclubContent.AccessToken.CONTENT_URI, accessToken.toContentValues());
+            SLog.d(this, "insertOrUpdate->insert uri=" + uri);
+            if (uri != null) {
+                return true;
+            }
         }
+        return false;
     }
 
-    public void updateUserKeyByEmail(String email, long userKey) {
+    public boolean updateUserKeyByEmail(String email, long userKey) {
         if (email != null && userKey >= 0) {
             AccessToken accessToken = queryByEmail(email);
             if (accessToken != null) {
                 accessToken.userId = userKey;
-                update(GitclubContent.AccessToken.CONTENT_URI, accessToken.toContentValues(), GitclubContent.AccessTokenColumns._ID + "=?", new String[]{String.valueOf(accessToken.id)});
+                int rows = update(GitclubContent.AccessToken.CONTENT_URI, accessToken.toContentValues(), GitclubContent.AccessTokenColumns._ID + "=?", new String[]{String.valueOf(accessToken.id)});
+                if (rows > 0) {
+                    return true;
+                }
             }
         }
+        return false;
     }
 
     public AccessToken queryByEmail(String email) {

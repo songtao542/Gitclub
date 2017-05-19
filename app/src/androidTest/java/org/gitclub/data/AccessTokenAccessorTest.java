@@ -1,48 +1,54 @@
 package org.gitclub.data;
 
 import android.content.Context;
+import android.media.MediaPlayer;
+import android.net.Uri;
+import android.provider.Settings;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.runner.AndroidJUnit4;
-import android.test.AndroidTestCase;
-import android.test.ProviderTestCase2;
+import android.test.InstrumentationTestCase;
+import android.util.Log;
 
 import org.gitclub.model.AccessToken;
-import org.gitclub.provider.GitclubContent;
-import org.gitclub.provider.GitclubProvider;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 /**
  * Created by le on 5/16/17.
  */
 @RunWith(AndroidJUnit4.class)
-public class AccessTokenAccessorTest extends ProviderTestCase2<GitclubProvider> {
-    /**
-     * Constructor.
-     *
-     * @param providerClass     The class name of the provider under test
-     * @param providerAuthority The provider's authority string
-     */
-    public AccessTokenAccessorTest(Class<GitclubProvider> providerClass, String providerAuthority) {
-        super(providerClass, providerAuthority);
-    }
+public class AccessTokenAccessorTest {
 
     @Test
-    public void testSave() throws Exception {
+    public void accessTokenAccessorTest() throws Exception {
         // Context of the app under test.
         Context appContext = InstrumentationRegistry.getTargetContext();
 
-        //assertEquals("org.gitclub", appContext.getPackageName());
+        String email = "songtao542@gmail.com";
         AccessTokenAccessor accessor = new AccessTokenAccessor(appContext);
         AccessToken token = new AccessToken();
-        token.accessToken = "1234567890";
+        String tokenStr = "token" + System.currentTimeMillis();
+        token.accessToken = tokenStr;
         token.scope = "scope1 scope2";
         token.tokenType = "type1";
-        assertNull(accessor.save(token));
+        token.email = email;
+        long userid = System.currentTimeMillis();
+        token.userId = userid;
+        boolean result = accessor.insertOrUpdateByEmail(token);
+        assertTrue(result);
 
-//        appContext.getContentResolver().query(GitclubContent.AccessToken.CONTENT_URI, null, GitclubContent.AccessTokenColumns.ACCESS_TOKEN + "=?", new String[]{"1234567890"}, null);
+        boolean result1 = accessor.updateUserKeyByEmail(email, System.currentTimeMillis() + 12345);
+        assertTrue(result1);
+
+        AccessToken qtoken = accessor.queryByEmail(email);
+        assertNotNull(qtoken);
+        assertEquals(qtoken.email, email);
+        assertEquals(qtoken.accessToken, tokenStr);
+        assertNotEquals(qtoken.userId, userid);
     }
 }
