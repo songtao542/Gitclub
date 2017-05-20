@@ -58,6 +58,12 @@ public class LoginPresenter implements Presenter {
     private String mUsername;
     private String mPassword;
 
+    /**
+     * @param context
+     * @param api
+     * @param sharedPreferences
+     * @param accessTokenStore
+     */
     @Inject
     public LoginPresenter(Context context, Api api, SharedPreferences sharedPreferences, AccessTokenStore accessTokenStore) {
         mContext = context;

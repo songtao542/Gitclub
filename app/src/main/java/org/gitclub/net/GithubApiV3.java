@@ -3,6 +3,7 @@ package org.gitclub.net;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 
+import org.gitclub.model.Event;
 import org.gitclub.model.Repository;
 import org.gitclub.model.User;
 
@@ -35,7 +36,7 @@ public interface GithubApiV3 {
     Call<User> getUser(@Path("username") String username);
 
     @GET("user")
-    Observable<User> rxGetUser();
+    Observable<User> rxuser();
 
     //https://api.github.com/user/repos?type=public
     @POST("user/repos")
@@ -80,5 +81,8 @@ public interface GithubApiV3 {
 
     @GET("/user/repos")
     Observable<ArrayList<Repository>> rxrepos();
+
+    @GET("/events")
+    Observable<ArrayList<Event>> rxevents();
 
 }

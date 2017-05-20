@@ -14,6 +14,7 @@ import android.view.ViewGroup;
 import org.gitclub.R;
 import org.gitclub.di.ActivityScope;
 import org.gitclub.di.components.ApplicationComponent;
+import org.gitclub.model.Event;
 import org.gitclub.model.Repository;
 import org.gitclub.presenter.ProfilePresenter;
 import org.gitclub.ui.adapter.ProfileOverviewAdapter;
@@ -93,7 +94,11 @@ public class ProfileFragment extends BaseFragment implements ProfileView {
         mRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
         mRecyclerView.setAdapter(mProfileOverviewAdapter);
 
-        mProfilePresenter.getRepos();
+        mProfilePresenter.setView(this);
+
+//        mProfilePresenter.getRepos();
+        mProfilePresenter.getReposWithEvents();
+
     }
 
     // TODO: Rename method, update argument and hook method into UI event
@@ -128,6 +133,11 @@ public class ProfileFragment extends BaseFragment implements ProfileView {
 
     @Override
     public void profile(List<Repository> repos) {
+        mProfileOverviewAdapter.setRepos(repos);
+    }
+
+    @Override
+    public void events(List<Event> events) {
 
     }
 

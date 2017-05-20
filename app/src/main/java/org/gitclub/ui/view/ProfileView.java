@@ -1,5 +1,6 @@
 package org.gitclub.ui.view;
 
+import org.gitclub.model.Event;
 import org.gitclub.model.Repository;
 
 import java.util.List;
@@ -10,4 +11,5 @@ import java.util.List;
 
 public interface ProfileView extends Loading {
     void profile(List<Repository> repos);
+    void events(List<Event> events);
 }

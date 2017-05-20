@@ -15,7 +15,7 @@ public class Repository extends Model {
     public String description;//"This your first repo!",
     @SerializedName("private")
     public boolean isPrivate;//false,
-    public String fork;//true,
+    public boolean fork;//true,
     public String url;//"https://api.github.com/repos/octocat/Hello-World",
     public String htmlUrl;//"https://github.com/octocat/Hello-World",
     public String archiveUrl;//"http://api.github.com/repos/octocat/Hello-World/{archive_format}{/ref}",

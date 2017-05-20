@@ -3,21 +3,17 @@ package org.gitclub.presenter;
 import android.content.Context;
 import android.content.SharedPreferences;
 
-import org.gitclub.GitApplication;
-import org.gitclub.data.AccessTokenAccessor;
 import org.gitclub.data.AccessTokenStore;
 import org.gitclub.data.UserAccessor;
 import org.gitclub.model.AccessToken;
 import org.gitclub.model.User;
 import org.gitclub.net.Api;
-import org.gitclub.net.GithubApi;
 import org.gitclub.net.GithubApiV3;
 import org.gitclub.ui.view.UserView;
 import org.gitclub.utils.SLog;
 
 import javax.inject.Inject;
 
-import io.reactivex.Scheduler;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.annotations.NonNull;
 import io.reactivex.functions.Consumer;
@@ -85,7 +81,7 @@ public class UserPresenter implements Presenter {
 
     public void getUser() {
         ensureGithubApiV3();
-        mGithubApiV3.rxGetUser()
+        mGithubApiV3.rxuser()
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Consumer<User>() {
