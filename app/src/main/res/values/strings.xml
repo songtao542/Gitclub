@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">gitclub</string>
+    <string name="app_name">Gitclub</string>
 
     <!-- Strings related to login -->
     <string name="prompt_email">Email</string>

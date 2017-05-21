@@ -15,7 +15,10 @@ public class Model {
         try {
             for (Field f : fields) {
                 f.setAccessible(true);
-                builder.append(f.getName() + ":" + f.get(this) + "\n");
+                Object value = f.get(this);
+                if (value != null) {
+                    builder.append(f.getName() + ":" + value + "\n");
+                }
             }
         } catch (Exception e) {
             e.printStackTrace();

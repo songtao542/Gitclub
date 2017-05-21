@@ -11,5 +11,8 @@ import java.util.List;
 
 public interface ProfileView extends Loading {
     void profile(List<Repository> repos);
+
     void events(List<Event> events);
+
+    void overview(List<Repository> repos, List<Event> events);
 }

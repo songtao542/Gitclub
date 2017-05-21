@@ -3,13 +3,12 @@ package org.gitclub.presenter;
 import android.content.Context;
 import android.util.Pair;
 
-import com.google.gson.JsonArray;
-
+import org.gitclub.data.UserTokenStore;
 import org.gitclub.model.Event;
-import org.gitclub.model.Model;
 import org.gitclub.model.Repository;
-import org.gitclub.net.GithubApiV3;
+import org.gitclub.model.User;
 import org.gitclub.net.Api;
+import org.gitclub.net.GithubApiV3;
 import org.gitclub.ui.view.ProfileView;
 import org.gitclub.utils.SLog;
 
@@ -18,7 +17,6 @@ import java.util.ArrayList;
 import javax.inject.Inject;
 
 import io.reactivex.Observable;
-import io.reactivex.Scheduler;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.annotations.NonNull;
 import io.reactivex.functions.BiFunction;
@@ -36,10 +34,15 @@ public class ProfilePresenter implements Presenter {
     private Context mContext;
     private ProfileView mProfileView;
 
+    private UserTokenStore mUserTokenStore;
+
+    private User mUser;
+
     @Inject
-    public ProfilePresenter(Context context, Api api) {
+    public ProfilePresenter(Context context, Api api, UserTokenStore userTokenStore ) {
         this.mContext = context;
         this.mApi = api;
+        this.mUserTokenStore = userTokenStore;
     }
 
     private void ensureGithubV3() {
@@ -76,6 +79,11 @@ public class ProfilePresenter implements Presenter {
                 });
     }
 
+    private void getUser(){
+
+    }
+
+
     public void getReposWithEvents() {
         ensureGithubV3();
         Observable<ArrayList<Repository>> repos = mGithubApiV3.rxrepos();
@@ -94,8 +102,7 @@ public class ProfilePresenter implements Presenter {
                                    SLog.d(ProfilePresenter.this, "repos size:" + pair.first.size() + "\n" + pair.first);
                                    SLog.d(ProfilePresenter.this, "events size:" + pair.second.size() + "\n" + pair.second);
                                    if (mProfileView != null) {
-                                       mProfileView.profile(pair.first);
-                                       mProfileView.events(pair.second);
+                                       mProfileView.overview(pair.first, pair.second);
                                    }
                                }
                            },

@@ -142,6 +142,11 @@ public class ProfileFragment extends BaseFragment implements ProfileView {
     }
 
     @Override
+    public void overview(List<Repository> repos, List<Event> events) {
+        mProfileOverviewAdapter.setData(repos,events);
+    }
+
+    @Override
     public void showLoading() {
 
     }

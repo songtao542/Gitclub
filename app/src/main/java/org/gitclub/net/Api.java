@@ -3,12 +3,10 @@ package org.gitclub.net;
 import com.google.gson.FieldNamingPolicy;
 import com.google.gson.GsonBuilder;
 
-import org.gitclub.data.AccessTokenStore;
+import org.gitclub.data.UserTokenStore;
 import org.gitclub.model.AccessToken;
 
 import java.io.IOException;
-
-import javax.inject.Inject;
 
 import okhttp3.Interceptor;
 import okhttp3.OkHttpClient;
@@ -25,13 +23,13 @@ import retrofit2.converter.gson.GsonConverterFactory;
 
 public class Api {
 
-    private AccessTokenStore mAccessTokenStore;
+    private UserTokenStore mUserTokenStore;
 
     private GithubApi mGithubApi;
     private GithubApiV3 mGithubApiV3;
 
-    public Api(AccessTokenStore accessTokenStore) {
-        mAccessTokenStore = accessTokenStore;
+    public Api(UserTokenStore userTokenStore) {
+        mUserTokenStore = userTokenStore;
     }
 
     public GithubApiV3 getGithubApiV3() {
@@ -48,9 +46,9 @@ public class Api {
         }
         OkHttpClient.Builder builder = new OkHttpClient.Builder();
         HttpLoggingInterceptor interceptor = new HttpLoggingInterceptor();
-        interceptor.setLevel(HttpLoggingInterceptor.Level.BASIC);
+        interceptor.setLevel(HttpLoggingInterceptor.Level.BODY);
         builder.addInterceptor(interceptor);
-        AccessToken token = mAccessTokenStore.getAccessToken();
+        AccessToken token = mUserTokenStore.getAccessToken();
         if (token == null) {
             throw new RuntimeException("AccessToken has not init.");
         }
@@ -72,7 +70,7 @@ public class Api {
         }
         OkHttpClient.Builder builder = new OkHttpClient.Builder();
         HttpLoggingInterceptor interceptor = new HttpLoggingInterceptor();
-        interceptor.setLevel(HttpLoggingInterceptor.Level.BASIC);
+        interceptor.setLevel(HttpLoggingInterceptor.Level.BODY);
         builder.addInterceptor(interceptor);
         builder.addInterceptor(new Interceptor() {
             @Override

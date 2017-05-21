@@ -19,9 +19,9 @@
     <application
         android:name=".GitApplication"
         android:allowBackup="true"
-        android:icon="@mipmap/ic_launcher"
+        android:icon="@mipmap/github"
         android:label="@string/app_name"
-        android:roundIcon="@mipmap/ic_launcher_round"
+        android:roundIcon="@mipmap/round_github"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <activity
@@ -38,15 +38,7 @@
             android:label="@string/label_gitclubprovider" />
 
         <activity
-            android:name=".ui.activities.MainFragmentActivity"
-            android:label="@string/title_activity_main"
-            android:screenOrientation="portrait"
-            android:theme="@style/AppTheme.NoActionBar">
-
-        </activity>
-        <activity
             android:name=".ui.activities.MainActivity"
-            android:label="@string/title_activity_main"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar">
             <intent-filter>

@@ -85,4 +85,7 @@ public interface GithubApiV3 {
     @GET("/events")
     Observable<ArrayList<Event>> rxevents();
 
+    @GET("/users/{username}/events")
+    Observable<ArrayList<Event>> rxevents(@Path("username") String username);
+
 }

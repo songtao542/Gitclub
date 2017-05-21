@@ -34,6 +34,7 @@ import org.gitclub.di.ActivityScope;
 import org.gitclub.di.components.ApplicationComponent;
 import org.gitclub.di.modules.ActivityModule;
 import org.gitclub.model.AccessToken;
+import org.gitclub.model.User;
 import org.gitclub.presenter.LoginPresenter;
 import org.gitclub.ui.view.LoginView;
 import org.gitclub.utils.SLog;
@@ -125,8 +126,8 @@ public class LoginActivity extends BaseActivity implements LoaderCallbacks<Curso
     }
 
     @Override
-    public void accessToken(AccessToken accessToken) {
-        intentToMain(accessToken.email);
+    public void success(User user) {
+        intentToMain(user.email);
     }
 
     @Override

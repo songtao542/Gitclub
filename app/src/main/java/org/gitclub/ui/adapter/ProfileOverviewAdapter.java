@@ -27,6 +27,12 @@ public class ProfileOverviewAdapter extends RecyclerView.Adapter<ProfileOverview
     List<Repository> mRepos;
     List<Event> mEvents;
 
+    public void setData(List<Repository> repos, List<Event> events) {
+        mRepos = repos;
+        mEvents = events;
+        notifyDataSetChanged();
+    }
+
     public void setRepos(List<Repository> data) {
         this.mRepos = data;
         notifyDataSetChanged();
@@ -189,7 +195,7 @@ public class ProfileOverviewAdapter extends RecyclerView.Adapter<ProfileOverview
 
         @Override
         public void setData(Event event) {
-            eventText.setText(event.actor.login);
+            eventText.setText(event.toString());
         }
     }
 }

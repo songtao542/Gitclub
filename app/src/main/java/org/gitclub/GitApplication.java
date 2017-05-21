@@ -4,11 +4,10 @@ import android.app.Application;
 
 import com.facebook.drawee.backends.pipeline.Fresco;
 
-import org.gitclub.data.AccessTokenStore;
+import org.gitclub.data.UserTokenStore;
 import org.gitclub.di.components.ApplicationComponent;
 import org.gitclub.di.components.DaggerApplicationComponent;
 import org.gitclub.di.modules.ApplicationModule;
-import org.gitclub.model.AccessToken;
 
 import javax.inject.Inject;
 
@@ -20,7 +19,7 @@ public class GitApplication extends Application {
 
     ApplicationComponent mAppComponent;
     @Inject
-    AccessTokenStore mAccessTokenStore;
+    UserTokenStore mUserTokenStore;
 
     @Override
     public void onCreate() {

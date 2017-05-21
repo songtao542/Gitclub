@@ -3,9 +3,8 @@ package org.gitclub.presenter;
 import android.content.Context;
 import android.content.SharedPreferences;
 
-import org.gitclub.data.AccessTokenStore;
 import org.gitclub.data.UserAccessor;
-import org.gitclub.model.AccessToken;
+import org.gitclub.data.UserTokenStore;
 import org.gitclub.model.User;
 import org.gitclub.net.Api;
 import org.gitclub.net.GithubApiV3;
@@ -31,19 +30,20 @@ public class UserPresenter implements Presenter {
     private UserView mUserView;
 
     private UserAccessor mUserAccessor;
-    private AccessTokenStore mAccessTokenStore;
+    private UserTokenStore mUserTokenStore;
 
     private SharedPreferences mSharedPreferences;
 
     private String mEmailAddress;
+    private User mUser;
 
     @Inject
-    public UserPresenter(Context context, Api api, UserAccessor userAccessor, SharedPreferences sharedPreferences, AccessTokenStore accessTokenStore) {
+    public UserPresenter(Context context, Api api, UserAccessor userAccessor, SharedPreferences sharedPreferences, UserTokenStore userTokenStore) {
         mContext = context;
         mApi = api;
         mUserAccessor = userAccessor;
         mSharedPreferences = sharedPreferences;
-        mAccessTokenStore = accessTokenStore;
+        mUserTokenStore = userTokenStore;
     }
 
     public void setUserView(UserView userView) {
@@ -58,16 +58,15 @@ public class UserPresenter implements Presenter {
     }
 
     public boolean hasLoginUser() {
-        mEmailAddress = mAccessTokenStore.getEmailAddress();
-        if (mEmailAddress == null) {
+        mUser = mUserTokenStore.getUser();
+        if (mUser == null) {
             mEmailAddress = mSharedPreferences.getString("login", null);
         }
         SLog.d(UserPresenter.this, "hasLoginUser email address=" + mEmailAddress);
         if (mEmailAddress != null) {
-            AccessToken accessToken = mAccessTokenStore.getAccessToken(mEmailAddress);
-            SLog.d(UserPresenter.this, "accessToken=" + accessToken);
-            if (accessToken != null && accessToken.accessToken != null) {
-                mAccessTokenStore.storeAccessToken(mEmailAddress, accessToken);
+            boolean restored = mUserTokenStore.restoreUserToken(mEmailAddress);
+            SLog.d(UserPresenter.this, "restore user accessToken " + restored);
+            if (restored) {
                 return true;
             }
         }
@@ -110,7 +109,7 @@ public class UserPresenter implements Presenter {
         }
         mUserAccessor.insertOrUpdateByEmail(user);
         long id = mUserAccessor.queryKeyByEmail(user.email);
-        mAccessTokenStore.updateUserKeyByEmail(user.email, id);
+        mUserTokenStore.updateTokenUserKeyByEmail(user.email, id);
     }
 
     @Override

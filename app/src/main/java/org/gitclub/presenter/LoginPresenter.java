@@ -13,13 +13,17 @@ import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 
-import org.gitclub.data.AccessTokenStore;
+import org.gitclub.data.UserTokenStore;
 import org.gitclub.model.AccessToken;
 import org.gitclub.model.Scopes;
+import org.gitclub.model.User;
 import org.gitclub.net.Api;
 import org.gitclub.net.GithubApi;
+import org.gitclub.net.GithubApiV3;
 import org.gitclub.ui.view.LoginView;
 import org.gitclub.utils.SLog;
+
+import java.lang.ref.WeakReference;
 
 import javax.inject.Inject;
 
@@ -37,13 +41,14 @@ public class LoginPresenter implements Presenter {
 
     static final String AUTHORIZE_URL = GithubApi.AUTHORIZE_URL + Scopes.user + " " + Scopes.repo;
 
-    private LoginView mLoginView;
+    private WeakReference<LoginView> mLoginView;
 
     private Context mContext;
 
-    private GithubApi mGithubApi;
     private Api mApi;
-    private AccessTokenStore mAccessTokenStore;
+    private GithubApi mGithubApi;
+    private GithubApiV3 mGithubApiV3;
+    private UserTokenStore mUserTokenStore;
 
     private WebView mWebView;
 
@@ -55,27 +60,27 @@ public class LoginPresenter implements Presenter {
 
     private SharedPreferences mSharedPreferences;
 
-    private String mUsername;
+    private String mEmailAddress;
     private String mPassword;
 
     /**
      * @param context
      * @param api
      * @param sharedPreferences
-     * @param accessTokenStore
+     * @param userTokenStore
      */
     @Inject
-    public LoginPresenter(Context context, Api api, SharedPreferences sharedPreferences, AccessTokenStore accessTokenStore) {
+    public LoginPresenter(Context context, Api api, SharedPreferences sharedPreferences, UserTokenStore userTokenStore) {
         mContext = context;
         mApi = api;
-        mAccessTokenStore = accessTokenStore;
+        mUserTokenStore = userTokenStore;
         mSharedPreferences = sharedPreferences;
         mWebView = new WebView(context);
         configWebView();
     }
 
     public void setLoginView(LoginView loginView) {
-        mLoginView = loginView;
+        mLoginView = new WeakReference<>(loginView);
     }
 
 
@@ -118,7 +123,7 @@ public class LoginPresenter implements Presenter {
 
                     if (mWaitLogin) {
                         mWaitLogin = false;
-                        login(mUsername, mPassword);
+                        login(mEmailAddress, mPassword);
                     }
                 } else {
                     mIsReady = false;
@@ -143,8 +148,8 @@ public class LoginPresenter implements Presenter {
                 String url = uri != null ? uri.toString() : "";
                 String prefix = "http://localhost:4567/callback?code=";
                 if (mLoadCounter > 1 && !url.startsWith(prefix)) {
-                    if (mLoginView != null) {
-                        mLoginView.showError("error");
+                    if (mLoginView != null && mLoginView.get() != null) {
+                        mLoginView.get().showError("error");
                     }
                 }
             }
@@ -156,8 +161,8 @@ public class LoginPresenter implements Presenter {
                 String url = uri != null ? uri.toString() : "";
                 String prefix = "http://localhost:4567/callback?code=";
                 if (mLoadCounter > 1 && !url.startsWith(prefix)) {
-                    if (mLoginView != null) {
-                        mLoginView.showError("http error");
+                    if (mLoginView != null && mLoginView.get() != null) {
+                        mLoginView.get().showError("http error");
                     }
                 }
             }
@@ -190,15 +195,15 @@ public class LoginPresenter implements Presenter {
         mWebView.evaluateJavascript(js, null);
     }
 
-    public void login(String username, String password) {
-        mUsername = username;
+    public void login(String email, String password) {
+        mEmailAddress = email;
         mPassword = password;
         if (mIsReady) {
             String js = "javascript:(function(){" +
                     "var username = document.getElementsByName(\"login\");" +
                     "var password = document.getElementsByName(\"password\"); " +
                     "var commit = document.getElementsByClassName(\"btn btn-block\"); " +
-                    "username[0].value = \"" + username + "\";" +
+                    "username[0].value = \"" + email + "\";" +
                     "password[0].value= \"" + password + "\";" +
                     "commit[0].click();" +
                     "console.log(\"点击登录\");" +
@@ -229,10 +234,8 @@ public class LoginPresenter implements Presenter {
                             SLog.d(LoginPresenter.this, "response getAccessToken:" + accessToken.accessToken);
                             SLog.d(LoginPresenter.this, "response tokenType:" + accessToken.tokenType);
                             SLog.d(LoginPresenter.this, "response scope:" + accessToken.scope);
-                            saveAccessToken(mUsername, accessToken);
-                            if (mLoginView != null) {
-                                mLoginView.hideLoading();
-                            }
+                            saveAccessToken(accessToken);
+                            getUser();
                         } else {
                             SLog.d(LoginPresenter.this, "getAccessToken from github server failure");
                         }
@@ -241,27 +244,75 @@ public class LoginPresenter implements Presenter {
                     @Override
                     public void accept(@NonNull Throwable throwable) throws Exception {
                         if (mLoginView != null) {
-                            mLoginView.showError(throwable.getMessage());
+                            LoginView loginView = mLoginView.get();
+                            if (loginView != null) {
+                                mLoginView.get().showError(throwable.getMessage());
+                            }
                         }
                     }
                 });
     }
 
-    private void saveAccessToken(String username, AccessToken accessToken) {
-        accessToken.email = username;
+    private GithubApiV3 ensureGithubApiV3() {
+        if (mGithubApiV3 == null) {
+            mGithubApiV3 = mApi.getGithubApiV3();
+        }
+        return mGithubApiV3;
+    }
 
-        SLog.d(this, "saveUserAccessToken getAccessToken:" + accessToken + " username:" + username);
+    public void getUser() {
+        ensureGithubApiV3();
+        mGithubApiV3.rxuser()
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Consumer<User>() {
+                    @Override
+                    public void accept(@NonNull User user) throws Exception {
+                        saveUser(user);
+                        if (mLoginView != null) {
+                            LoginView loginView = mLoginView.get();
+                            if (loginView != null) {
+                                loginView.hideLoading();
+                                loginView.success(user);
+                            }
+                        }
+                    }
+                }, new Consumer<Throwable>() {
+                    @Override
+                    public void accept(@NonNull Throwable throwable) throws Exception {
+                        SLog.d(LoginPresenter.this, "getUser from github server failure");
+                        if (mLoginView != null) {
+                            LoginView loginView = mLoginView.get();
+                            if (loginView != null) {
+                                loginView.showError(throwable.getMessage());
+                            }
+                        }
+                    }
+                });
+    }
+
+    private void saveUser(User user) {
+        SLog.d(LoginPresenter.this, "saveUser to database user=" + user);
+        if (user.email == null) {
+            user.email = mEmailAddress;
+        }
+        mUserTokenStore.insertOrUpdateUserByEmail(user);
+        long id = mUserTokenStore.queryUserKeyByEmail(user.email);
+        mUserTokenStore.updateTokenUserKeyByEmail(user.email, id);
+        mUserTokenStore.storeUser(user);
+    }
+
+    private void saveAccessToken(AccessToken accessToken) {
+        accessToken.email = mEmailAddress;
+
+        SLog.d(this, "saveUserAccessToken getAccessToken:" + accessToken);
 
         SharedPreferences.Editor editor = mSharedPreferences.edit();
-        editor.putString("login", username);
+        editor.putString("login", mEmailAddress);
         editor.commit();
 
-        //mContext.getContentResolver().insert(GitclubContent.AccessToken.CONTENT_URI, getAccessToken.toContentValues());
-        mAccessTokenStore.insertOrUpdateByEmail(accessToken);
-        mAccessTokenStore.storeAccessToken(accessToken.email, accessToken);
-        if (mLoginView != null) {
-            mLoginView.accessToken(accessToken);
-        }
+        mUserTokenStore.insertOrUpdateTokenByEmail(accessToken);
+        mUserTokenStore.storeAccessToken(accessToken);
     }
 
     @Override

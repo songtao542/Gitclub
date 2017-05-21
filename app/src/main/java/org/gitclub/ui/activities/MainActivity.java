@@ -1,8 +1,8 @@
 package org.gitclub.ui.activities;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.UriMatcher;
-import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.design.widget.NavigationView;
@@ -21,11 +21,10 @@ import android.widget.TextView;
 import com.facebook.drawee.view.SimpleDraweeView;
 
 import org.gitclub.R;
+import org.gitclub.data.UserTokenStore;
 import org.gitclub.di.ActivityScope;
 import org.gitclub.di.components.ApplicationComponent;
 import org.gitclub.model.User;
-import org.gitclub.presenter.UserPresenter;
-import org.gitclub.provider.GitclubContent;
 import org.gitclub.ui.fragments.BaseFragment;
 import org.gitclub.ui.fragments.GistFragment;
 import org.gitclub.ui.fragments.IssuesFragment;
@@ -35,7 +34,6 @@ import org.gitclub.ui.fragments.StarsFragment;
 import org.gitclub.ui.view.UserView;
 import org.gitclub.utils.SLog;
 
-import java.util.ArrayList;
 import java.util.WeakHashMap;
 
 import javax.inject.Inject;
@@ -52,7 +50,10 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
     }
 
     @Inject
-    UserPresenter mUserPresenter;
+    UserTokenStore mUserTokenStore;
+
+    @Inject
+    SharedPreferences mSharedPreferences;
 
     @BindView(R.id.drawer_layout)
     protected DrawerLayout mDrawer;
@@ -78,7 +79,19 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
 
         DaggerMainActivity_Component.builder().applicationComponent(getApplicationComponent()).build().inject(this);
 
-        if (!mUserPresenter.hasLoginUser()) {
+        User user = mUserTokenStore.getUser();
+        if (user == null) {
+            String emailAddress = mSharedPreferences.getString("login", null);
+            SLog.d(MainActivity.this, "LoginUser email address=" + emailAddress);
+            if (emailAddress != null) {
+                boolean restored = mUserTokenStore.restoreUserToken(emailAddress);
+                SLog.d(MainActivity.this, "restore user accessToken " + restored);
+                if (restored) {
+                    user = mUserTokenStore.getUser();
+                }
+            }
+        }
+        if (user == null) {
             intentToLogin();
             return;
         }
@@ -102,14 +115,15 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
         mUserHead = (SimpleDraweeView) navigationView.getHeaderView(0).findViewById(R.id.userhead);
         mUserName = (TextView) navigationView.getHeaderView(0).findViewById(R.id.username);
         mUserEmail = (TextView) navigationView.getHeaderView(0).findViewById(R.id.useremail);
-        SLog.d(this, "initLoader");
-        getSupportLoaderManager().initLoader(0, null, this);
-
-        mUserPresenter.setUserView(this);
 
         navigationView.setCheckedItem(R.id.nav_profile);
         transactionTo(TAG_PROFILE);
+
+        mUserHead.setImageURI(user.avatarUrl);
+        mUserName.setText(user.login);
+        mUserEmail.setText(user.email);
     }
+
 
     private void transactionTo(String tag) {
         mCurrentFragment = mCachedFragments.get(tag);
@@ -204,22 +218,19 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
 
             @Override
             public User loadInBackground() {
-                String emailAddress = mUserPresenter.getEmailAddress();
-                if (emailAddress == null) {
-                    emailAddress = getIntent().getStringExtra("EXTRA_EMAIL");
-                }
-                Cursor cursor = getContext().getContentResolver().query(Uri.withAppendedPath(GitclubContent.User.CONTENT_URI, "email/" + emailAddress),
-                        null, null, null, null);
-                SLog.d("loadInBackground cursor=" + cursor);
-                if (cursor != null) {
-                    ArrayList<User> users = User.fromCursor(cursor);
-                    if (users != null && users.size() > 0) {
-                        return users.get(0);
-                    } else {
-                        mUserPresenter.getUser();
+                User user = mUserTokenStore.getUser();
+                if (user == null) {
+                    String emailAddress = mSharedPreferences.getString("login", null);
+                    SLog.d(MainActivity.this, "hasLoginUser email address=" + emailAddress);
+                    if (emailAddress != null) {
+                        boolean restored = mUserTokenStore.restoreUserToken(emailAddress);
+                        SLog.d(MainActivity.this, "restore user accessToken " + restored);
+                        if (restored) {
+                            user = mUserTokenStore.getUser();
+                        }
                     }
                 }
-                return null;
+                return user;
             }
 
             @Override
@@ -228,22 +239,20 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
                 forceLoad();
             }
         };
-
     }
 
     @Override
-    public void onLoadFinished(Loader<User> loader, User data) {
-        SLog.d("onLoadFinished user=" + data);
-        if (data != null) {
-            mUserHead.setImageURI(data.avatarUrl);
-            mUserName.setText(data.login);
-            mUserEmail.setText(data.email);
+    public void onLoadFinished(Loader<User> loader, User user) {
+        SLog.d(MainActivity.this, "onLoadFinished user=" + user);
+        if (user != null) {
+            mUserHead.setImageURI(user.avatarUrl);
+            mUserName.setText(user.login);
+            mUserEmail.setText(user.email);
         }
     }
 
     @Override
     public void onLoaderReset(Loader<User> loader) {
-
     }
 
 

@@ -1,34 +1,18 @@
 package org.gitclub.di.modules;
 
-import android.app.Application;
 import android.content.Context;
 import android.content.SharedPreferences;
 
-import com.google.gson.FieldNamingPolicy;
-import com.google.gson.GsonBuilder;
-
 import org.gitclub.GitApplication;
 import org.gitclub.data.AccessTokenAccessor;
-import org.gitclub.data.AccessTokenStore;
+import org.gitclub.data.UserAccessor;
+import org.gitclub.data.UserTokenStore;
 import org.gitclub.net.Api;
-import org.gitclub.net.GithubApi;
-import org.gitclub.net.GithubApiV3;
-
-import java.io.IOException;
 
 import javax.inject.Singleton;
 
-import dagger.Binds;
 import dagger.Module;
 import dagger.Provides;
-import okhttp3.Interceptor;
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
-import okhttp3.Response;
-import okhttp3.logging.HttpLoggingInterceptor;
-import retrofit2.Retrofit;
-import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory;
-import retrofit2.converter.gson.GsonConverterFactory;
 
 /**
  * Created by le on 3/31/17.
@@ -40,7 +24,7 @@ public class ApplicationModule {
 
     private SharedPreferences mSharedPreferences;
 
-    private AccessTokenStore mAccessTokenStore;
+    private UserTokenStore mUserTokenStore;
     private Api mApi;
 
     public ApplicationModule(GitApplication application) {
@@ -70,19 +54,19 @@ public class ApplicationModule {
 
     @Singleton
     @Provides
-    public AccessTokenStore accessTokenStore(Context context) {
-        if (mAccessTokenStore == null) {
-            mAccessTokenStore = new AccessTokenStore(context);
+    public UserTokenStore accessTokenStore(AccessTokenAccessor accessTokenAccessor, UserAccessor userAccessor) {
+        if (mUserTokenStore == null) {
+            mUserTokenStore = new UserTokenStore(accessTokenAccessor, userAccessor);
         }
-        return mAccessTokenStore;
+        return mUserTokenStore;
     }
 
 
     @Singleton
     @Provides
-    public Api api(AccessTokenStore accessTokenStore) {
+    public Api api(UserTokenStore userTokenStore) {
         if (mApi == null) {
-            mApi = new Api(accessTokenStore);
+            mApi = new Api(userTokenStore);
         }
         return mApi;
     }
