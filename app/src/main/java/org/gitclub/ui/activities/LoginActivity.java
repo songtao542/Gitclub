@@ -120,7 +120,7 @@ public class LoginActivity extends BaseActivity implements LoaderCallbacks<Curso
         mProgressView = findViewById(R.id.login_progress);
 
         mEmailView.setText("songtao542@gmail.com");
-        mPasswordView.setText("wst472036045");
+        mPasswordView.setText("");
 
         mLoginPresenter.setLoginView(this);
     }
