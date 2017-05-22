@@ -24,17 +24,17 @@ public class Payload extends Model {
      * commits : [{"sha":"ccef34c92503d599a2302fa3d450074b759e9b08","author":{"email":"takahiko03@gmail.com","name":"takahi-i"},"message":"Bump v1.9","distinct":true,"url":"https://api.github.com/repos/redpen-cc/redpen-doc/commits/ccef34c92503d599a2302fa3d450074b759e9b08"}]
      */
 
-    private int pushId;
-    private int size;
-    private int distinctSize;
-    private String ref;
-    private String head;
-    private String before;
-    private List<Commit> commits;
-    private String refType;
-    private String masterBranch;
-    private String description;
-    private String pusherType;
+    public  int pushId;
+    public  int size;
+    public  int distinctSize;
+    public  String ref;
+    public  String head;
+    public  String before;
+    public  List<Commit> commits;
+    public  String refType;
+    public  String masterBranch;
+    public  String description;
+    public  String pusherType;
 
 
 

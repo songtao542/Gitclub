@@ -10,8 +10,8 @@ public class Author extends Model {
      * name : takahi-i
      */
 
-    private String email;
-    private String name;
+    public String email;
+    public String name;
 
 
 }

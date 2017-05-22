@@ -9,7 +9,10 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import com.facebook.drawee.view.SimpleDraweeView;
+
 import org.gitclub.R;
+import org.gitclub.model.Commit;
 import org.gitclub.model.Event;
 import org.gitclub.model.Repository;
 
@@ -26,6 +29,7 @@ public class ProfileOverviewAdapter extends RecyclerView.Adapter<ProfileOverview
 
     List<Repository> mRepos;
     List<Event> mEvents;
+
 
     public void setData(List<Repository> repos, List<Event> events) {
         mRepos = repos;
@@ -184,9 +188,16 @@ public class ProfileOverviewAdapter extends RecyclerView.Adapter<ProfileOverview
     }
 
     static class EventHolder extends Holder {
-        @BindView(R.id.event)
-        TextView eventText;
+        @BindView(R.id.repo)
+        TextView repo;
+        @BindView(R.id.commit)
+        TextView commit;
 
+        @BindView(R.id.avatar)
+        SimpleDraweeView avatar;
+
+        @BindView(R.id.actor)
+        TextView actor;
 
         public EventHolder(View itemView) {
             super(itemView);
@@ -195,7 +206,31 @@ public class ProfileOverviewAdapter extends RecyclerView.Adapter<ProfileOverview
 
         @Override
         public void setData(Event event) {
-            eventText.setText(event.toString());
+            repo.setText(event.repo.name);
+            avatar.setImageURI(event.actor.avatarUrl);
+            actor.setText(event.actor.login);
+            if ("PushEvent".equals(event.type)) {
+                StringBuilder builder = new StringBuilder();
+                List<Commit> commits = event.payload.commits;
+                int size = commits.size();
+                for (int i = 0; i < size; i++) {
+                    Commit commit = commits.get(i);
+                    builder.append("commit: " + commit.sha + "\n");
+                    builder.append("Author: " + commit.author.name + " <" + commit.author.email + ">" + "\n");
+                    builder.append("Date: " + event.createdAt + "\n");
+                    if (i == size - 1) {
+                        builder.append(commit.message);
+                    } else {
+                        builder.append(commit.message + "\n\n");
+                    }
+                }
+                commit.setText(builder.toString());
+            } else if ("CreateEvent".equals(event.type)) {
+                StringBuilder builder = new StringBuilder();
+                builder.append("Date:" + event.createdAt + "\n");
+                builder.append(event.payload.description);
+                commit.setText(builder.toString());
+            }
         }
     }
 }

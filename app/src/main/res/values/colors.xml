@@ -11,5 +11,7 @@
     <color name="lang_cpp">#fff5487c</color>
     <color name="lang_js">#fff2e24d</color>
     <color name="lang_go">#ff345cad</color>
+    <color name="sticky_header_color">#ff444444</color>
+    <color name="sticky_text_color">#ffffffff</color>
 
 </resources>

@@ -8,9 +8,9 @@ import com.google.gson.annotations.SerializedName;
 
 public class Repository extends Model {
 
-    String id;//1296269,
-    User owner;
-    String name;//"Hello-World",
+    public String id;//1296269,
+    public User owner;
+    public String name;//"Hello-World",
     public String fullName;//"octocat/Hello-World",
     public String description;//"This your first repo!",
     @SerializedName("private")

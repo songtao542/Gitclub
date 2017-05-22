@@ -38,8 +38,11 @@ public class ProfilePresenter implements Presenter {
 
     private User mUser;
 
+    private static final int PAGE_SIZE = 30;
+    private int mPageIndex = 1;
+
     @Inject
-    public ProfilePresenter(Context context, Api api, UserTokenStore userTokenStore ) {
+    public ProfilePresenter(Context context, Api api, UserTokenStore userTokenStore) {
         this.mContext = context;
         this.mApi = api;
         this.mUserTokenStore = userTokenStore;
@@ -79,15 +82,19 @@ public class ProfilePresenter implements Presenter {
                 });
     }
 
-    private void getUser(){
+    private void getUser() {
 
     }
 
 
     public void getReposWithEvents() {
         ensureGithubV3();
+        User user = mUserTokenStore.getUser();
+        if (user == null) {
+            return;
+        }
         Observable<ArrayList<Repository>> repos = mGithubApiV3.rxrepos();
-        Observable<ArrayList<Event>> events = mGithubApiV3.rxevents();
+        Observable<ArrayList<Event>> events = mGithubApiV3.rxevents(user.login, mPageIndex, PAGE_SIZE);
         Observable.zip(repos, events, new BiFunction<ArrayList<Repository>, ArrayList<Event>, Pair<ArrayList<Repository>, ArrayList<Event>>>() {
             @Override
             public Pair<ArrayList<Repository>, ArrayList<Event>> apply(@NonNull ArrayList<Repository> repositories, @NonNull ArrayList<Event> events) throws Exception {
@@ -119,7 +126,11 @@ public class ProfilePresenter implements Presenter {
 
     public void getEvents() {
         ensureGithubV3();
-        mGithubApiV3.rxevents()
+        User user = mUserTokenStore.getUser();
+        if (user == null) {
+            return;
+        }
+        mGithubApiV3.rxevents(user.login, mPageIndex, PAGE_SIZE)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Consumer<ArrayList<Event>>() {

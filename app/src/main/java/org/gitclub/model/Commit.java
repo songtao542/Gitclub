@@ -13,10 +13,9 @@ public class Commit extends Model {
      * url : https://api.github.com/repos/redpen-cc/redpen-doc/commits/ccef34c92503d599a2302fa3d450074b759e9b08
      */
 
-    private String sha;
-    private Author author;
-    private String message;
-    private boolean distinct;
-    private String url;
-
+    public String sha;
+    public Author author;
+    public String message;
+    public boolean distinct;
+    public String url;
 }
