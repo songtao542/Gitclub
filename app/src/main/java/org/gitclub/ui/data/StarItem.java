@@ -1,11 +1,14 @@
 package org.gitclub.ui.data;
 
+import android.annotation.TargetApi;
 import android.content.Context;
+import android.os.Build;
 import android.view.View;
 import android.widget.TextView;
 
 import org.gitclub.R;
 import org.gitclub.model.Repository;
+import org.gitclub.model.Star;
 import org.gitclub.utils.SLog;
 
 import java.util.ArrayList;
@@ -18,22 +21,21 @@ import eu.davidea.flexibleadapter.FlexibleAdapter;
  * Created by wangsongtao on 2017/5/22.
  */
 
-public class RepositoryItem extends SectionableItem<Repository, RepositoryItem.Holder> {
+public class StarItem extends Item<Star, StarItem.Holder> {
 
-    public static List<RepositoryItem> convert(List<Repository> list) {
-        ArrayList<RepositoryItem> items = new ArrayList<>();
+    public static List<StarItem> convert(List<Star> list) {
+        ArrayList<StarItem> items = new ArrayList<>();
         if (list != null) {
-            HeaderItem header = new HeaderItem("Repositories");
-            for (Repository t : list) {
-                RepositoryItem item = new RepositoryItem(t, header);
+            for (Star t : list) {
+                StarItem item = new StarItem(t);
                 items.add(item);
             }
         }
         return items;
     }
 
-    private RepositoryItem(Repository repository, HeaderItem header) {
-        super(repository, header);
+    private StarItem(Star star) {
+        super(star);
     }
 
     @Override
@@ -46,7 +48,7 @@ public class RepositoryItem extends SectionableItem<Repository, RepositoryItem.H
         return new Holder(view, adapter);
     }
 
-    public static class Holder extends SectionableItem.Holder<Repository> {
+    public static class Holder extends Item.Holder<Star> {
         @BindView(R.id.repoName)
         TextView repoName;
         @BindView(R.id.forked)
@@ -65,34 +67,32 @@ public class RepositoryItem extends SectionableItem<Repository, RepositoryItem.H
         }
 
         @Override
-        public void setData(Repository repository) {
-            SLog.d(this, "repository:" + repository.toString());
-            repoName.setText(repository.fullName);
-            if (repository.fork) {
+        public void setData(Star star) {
+            SLog.d(this, "star:" + star.toString());
+            repoName.setText(star.fullName);
+            if (star.fork) {
                 forked.setVisibility(View.VISIBLE);
-                forked.setText(repository.forksUrl);
+                forked.setText(star.forksUrl);
             } else {
                 forked.setVisibility(View.GONE);
             }
-            descrip.setText(repository.description);
+            descrip.setText(star.description);
 
-            language.setText(repository.language);
+            language.setText(star.language);
             Context context = itemView.getContext();
-            language.getCompoundDrawables()[0].setTint(Language.getColor(context, repository.language));
-            if (repository.stargazersCount > 0) {
+            language.getCompoundDrawables()[0].setTint(Language.getColor(context, star.language));
+            if (star.stargazersCount > 0) {
                 stars.setVisibility(View.VISIBLE);
-                stars.setText(String.valueOf(repository.stargazersCount));
+                stars.setText(String.valueOf(star.stargazersCount));
             } else {
                 stars.setVisibility(View.INVISIBLE);
             }
-            if (repository.forksCount > 0) {
+            if (star.forksCount > 0) {
                 network.setVisibility(View.VISIBLE);
-                network.setText(String.valueOf(repository.forksCount));
+                network.setText(String.valueOf(star.forksCount));
             } else {
                 network.setVisibility(View.INVISIBLE);
             }
         }
-
-
     }
 }

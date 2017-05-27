@@ -1,8 +1,6 @@
 package org.gitclub.ui.data;
 
-import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.facebook.drawee.view.SimpleDraweeView;
@@ -21,7 +19,7 @@ import eu.davidea.flexibleadapter.FlexibleAdapter;
  * Created by wangsongtao on 2017/5/22.
  */
 
-public class EventItem extends Item<Event, EventItem.Holder> {
+public class EventItem extends SectionableItem<Event, EventItem.Holder> {
 
     public static List<EventItem> convert(List<Event> list) {
         ArrayList<EventItem> items = new ArrayList<>();
@@ -50,7 +48,7 @@ public class EventItem extends Item<Event, EventItem.Holder> {
         return new Holder(view, adapter);
     }
 
-    public static class Holder extends Item.Holder<Event> {
+    public static class Holder extends SectionableItem.Holder<Event> {
 
         @BindView(R.id.repo)
         TextView repo;

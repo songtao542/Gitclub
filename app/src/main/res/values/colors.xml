@@ -2,6 +2,8 @@
 <resources>
     <color name="colorPrimary">#ff444444</color>
     <color name="colorPrimaryDark">#ff444444</color>
+    <color name="windowBackground">#fff9f9f9</color>
+
     <color name="colorAccent">#ffFF4081</color>
     <color name="textcolor">#ff757575</color>
     <color name="iconcolor">#ff757575</color>
@@ -9,9 +11,38 @@
     <color name="lang_shell">#ff86e246</color>
     <color name="lang_python">#ff3271a7</color>
     <color name="lang_cpp">#fff5487c</color>
+    <color name="lang_c">#ff555555</color>
+    <color name="lang_html">#ffe34c26</color>
+    <color name="lang_scala">#ffc22d40</color>
+    <color name="lang_kotlin">#fff18e33</color>
+    <color name="lang_groovy">#ffe69f56</color>
+    <color name="lang_ocaml">#ff3be133</color>
+    <color name="lang_standardml">#ffdc566d</color>
+    <color name="lang_coffeescript">#ff244776</color>
+    <color name="lang_makefile">#ff427819</color>
+    <color name="lang_apacheconf">#ffcccccc</color>
+    <color name="lang_csharp">#ff178600</color>
+    <color name="lang_jupyternotebook">#ffda5b0b</color>
+    <color name="lang_emacslisp">#ffc065db</color>
+    <color name="lang_typescript">#ff2b7489</color>
+    <color name="lang_cmake">#ffcccccc</color>
+    <color name="lang_d">#ffba595e</color>
+    <color name="lang_racket">#ff22228f</color>
+    <color name="lang_erlang">#ffb83998</color>
+    <color name="lang_swift">#ffffac45</color>
+    <color name="lang_eagle">#ff814c05</color>
+    <color name="lang_clojure">#ffdb5855</color>
+    <color name="lang_haskell">#ff29b544</color>
+    <color name="lang_lua">#ff000080</color>
+    <color name="lang_tex">#ff3d6117</color>
+    <color name="lang_ruby">#ff701516</color>
+    <color name="lang_objc">#ff438eff</color>
+    <color name="lang_css">#ff563d7c</color>
+    <color name="lang_php">#ff4f5d95</color>
+    <color name="lang_perl">#ff0298c3</color>
     <color name="lang_js">#fff2e24d</color>
     <color name="lang_go">#ff345cad</color>
-    <color name="sticky_header_color">#ff444444</color>
-    <color name="sticky_text_color">#ffffffff</color>
+    <color name="sticky_header_color">#fff9f9f9</color>
+    <color name="sticky_text_color">#ff757575</color>
 
 </resources>

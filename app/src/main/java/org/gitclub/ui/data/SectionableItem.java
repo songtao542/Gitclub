@@ -14,7 +14,6 @@ import java.util.List;
 import butterknife.ButterKnife;
 import eu.davidea.flexibleadapter.FlexibleAdapter;
 import eu.davidea.flexibleadapter.helpers.AnimatorHelper;
-import eu.davidea.flexibleadapter.items.AbstractFlexibleItem;
 import eu.davidea.flexibleadapter.items.AbstractSectionableItem;
 import eu.davidea.viewholders.FlexibleViewHolder;
 
@@ -22,11 +21,12 @@ import eu.davidea.viewholders.FlexibleViewHolder;
  * Created by wangsongtao on 2017/5/22.
  */
 
-public abstract class Item<T, VH extends Item.Holder> extends AbstractFlexibleItem<VH> {
+public abstract class SectionableItem<T, VH extends SectionableItem.Holder> extends AbstractSectionableItem<VH, HeaderItem> {
 
     private T mData;
 
-    public Item(T t) {
+    public SectionableItem(T t, HeaderItem header) {
+        super(header);
         mData = t;
     }
 

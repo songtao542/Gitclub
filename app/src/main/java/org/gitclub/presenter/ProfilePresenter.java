@@ -36,8 +36,6 @@ public class ProfilePresenter implements Presenter {
 
     private UserTokenStore mUserTokenStore;
 
-    private User mUser;
-
     private static final int PAGE_SIZE = 30;
     private int mPageIndex = 1;
 

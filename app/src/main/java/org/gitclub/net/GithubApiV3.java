@@ -5,6 +5,7 @@ import com.google.gson.JsonObject;
 
 import org.gitclub.model.Event;
 import org.gitclub.model.Repository;
+import org.gitclub.model.Star;
 import org.gitclub.model.User;
 
 import java.util.ArrayList;
@@ -90,5 +91,8 @@ public interface GithubApiV3 {
 
     @GET("/users/{username}/events")
     Observable<ArrayList<Event>> rxevents(@Path("username") String username, @Query("page") int page, @Query("per_page") int pageSize);
+
+    @GET("/user/starred")
+    Observable<ArrayList<Star>> rxstars(@Query("page") int page, @Query("per_page") int pageSize);
 
 }
