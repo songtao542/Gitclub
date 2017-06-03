@@ -92,7 +92,7 @@ public class Star extends Model {
     public String fullName;
     public String description;
     @SerializedName("public")
-    public boolean ispublic;
+    public boolean isPublic;
     public boolean fork;
     public String url;
     public String htmlUrl;

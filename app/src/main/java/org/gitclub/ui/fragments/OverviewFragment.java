@@ -5,6 +5,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -34,17 +35,17 @@ import eu.davidea.flexibleadapter.items.AbstractFlexibleItem;
 /**
  * A simple {@link Fragment} subclass.
  * Activities that contain this fragment must implement the
- * {@link ProfileFragment.OnFragmentInteractionListener} interface
+ * {@link OverviewFragment.OnFragmentInteractionListener} interface
  * to handle interaction events.
- * Use the {@link ProfileFragment#newInstance} factory method to
+ * Use the {@link OverviewFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class ProfileFragment extends BaseFragment implements ProfileView {
+public class OverviewFragment extends BaseFragment implements ProfileView {
 
     @ActivityScope
     @dagger.Component(dependencies = {ApplicationComponent.class})
     public interface Component {
-        void inject(ProfileFragment fragment);
+        void inject(OverviewFragment fragment);
     }
 
     @Inject
@@ -53,12 +54,11 @@ public class ProfileFragment extends BaseFragment implements ProfileView {
     @BindView(R.id.recyclerView)
     RecyclerView mRecyclerView;
 
-
-    //    ProfileOverviewAdapter mProfileOverviewAdapter;
+    //    OverviewAdapter mProfileOverviewAdapter;
     FlexibleAdapter<AbstractFlexibleItem> mAdapter;
     private OnFragmentInteractionListener mListener;
 
-    public ProfileFragment() {
+    public OverviewFragment() {
         // Required empty public constructor
     }
 
@@ -66,10 +66,10 @@ public class ProfileFragment extends BaseFragment implements ProfileView {
      * Use this factory method to create a new instance of
      * this fragment .
      *
-     * @return A new instance of fragment ProfileFragment.
+     * @return A new instance of fragment OverviewFragment.
      */
-    public static ProfileFragment newInstance() {
-        ProfileFragment fragment = new ProfileFragment();
+    public static OverviewFragment newInstance() {
+        OverviewFragment fragment = new OverviewFragment();
         Bundle args = new Bundle();
         fragment.setArguments(args);
         return fragment;
@@ -92,9 +92,11 @@ public class ProfileFragment extends BaseFragment implements ProfileView {
         super.onViewCreated(view, savedInstanceState);
         ButterKnife.bind(this, view);
 
-        DaggerProfileFragment_Component.builder().applicationComponent(getApplicationComponent()).build().inject(this);
+        DaggerOverviewFragment_Component.builder().applicationComponent(getApplicationComponent()).build().inject(this);
 
-//        mProfileOverviewAdapter = new ProfileOverviewAdapter();
+        ((AppCompatActivity) getActivity()).getSupportActionBar().setTitle("Overview");
+
+//        mProfileOverviewAdapter = new OverviewAdapter();
 
         mAdapter = new FlexibleAdapter<>(null, null, true);
 

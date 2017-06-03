@@ -4,6 +4,8 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 
 import org.gitclub.model.Event;
+import org.gitclub.model.Gist;
+import org.gitclub.model.PullRequest;
 import org.gitclub.model.Repository;
 import org.gitclub.model.Star;
 import org.gitclub.model.User;
@@ -94,5 +96,11 @@ public interface GithubApiV3 {
 
     @GET("/user/starred")
     Observable<ArrayList<Star>> rxstars(@Query("page") int page, @Query("per_page") int pageSize);
+
+    @GET("/gists")
+    Observable<ArrayList<Gist>> rxgists(@Query("page") int page, @Query("per_page") int pageSize);
+
+    @GET("/repos/{owner}/{repo}/pulls")
+    Observable<ArrayList<PullRequest>> rxpulls(@Path("owner") String owner, @Path("repo") String repo, @Query("page") int page, @Query("per_page") int pageSize);
 
 }

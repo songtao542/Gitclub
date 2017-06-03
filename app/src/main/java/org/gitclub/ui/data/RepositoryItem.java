@@ -7,6 +7,7 @@ import android.widget.TextView;
 import org.gitclub.R;
 import org.gitclub.model.Repository;
 import org.gitclub.utils.SLog;
+import org.gitclub.widget.Circle;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -53,6 +54,8 @@ public class RepositoryItem extends SectionableItem<Repository, RepositoryItem.H
         TextView forked;
         @BindView(R.id.descrip)
         TextView descrip;
+        @BindView(R.id.languageColor)
+        Circle languageColor;
         @BindView(R.id.language)
         TextView language;
         @BindView(R.id.stars)
@@ -78,7 +81,8 @@ public class RepositoryItem extends SectionableItem<Repository, RepositoryItem.H
 
             language.setText(repository.language);
             Context context = itemView.getContext();
-            language.getCompoundDrawables()[0].setTint(Language.getColor(context, repository.language));
+            languageColor.setColor(Language.getColor(context, repository.language));
+//            language.getCompoundDrawables()[0].setTint(Language.getColor(context, repository.language));
             if (repository.stargazersCount > 0) {
                 stars.setVisibility(View.VISIBLE);
                 stars.setText(String.valueOf(repository.stargazersCount));

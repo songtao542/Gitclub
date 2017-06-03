@@ -26,6 +26,7 @@ public class Api {
     private UserTokenStore mUserTokenStore;
 
     private GithubApi mGithubApi;
+    private GistApi mGistApi;
     private GithubApiV3 mGithubApiV3;
 
     public Api(UserTokenStore userTokenStore) {
@@ -38,6 +39,10 @@ public class Api {
 
     public GithubApi getGithubApi() {
         return createApi();
+    }
+
+    public GistApi getGistApi() {
+        return createGistApi();
     }
 
     private GithubApiV3 createApiV3() {
@@ -124,5 +129,38 @@ public class Api {
             return chain.proceed(request);
         }
     }
+
+
+    private GistApi createGistApi() {
+        if (mGistApi != null) {
+            return mGistApi;
+        }
+        OkHttpClient.Builder builder = new OkHttpClient.Builder();
+        HttpLoggingInterceptor interceptor = new HttpLoggingInterceptor();
+        interceptor.setLevel(HttpLoggingInterceptor.Level.BODY);
+        builder.addInterceptor(interceptor);
+        builder.addInterceptor(new Interceptor() {
+            @Override
+            public Response intercept(Chain chain) throws IOException {
+                Request request = chain.request()
+                        .newBuilder()
+                        .addHeader("Accept", "application/json")
+//                        .addHeader("User-Agent", "Gitclub-App")
+                        .build();
+                return chain.proceed(request);
+            }
+        });
+        GsonBuilder gsonBuilder = new GsonBuilder().setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES);
+        Retrofit retrofit = new Retrofit.Builder()
+                .baseUrl("https://gist.github.com/")
+                .addConverterFactory(GsonConverterFactory.create(gsonBuilder.create()))
+                .addCallAdapterFactory(RxJava2CallAdapterFactory.createAsync())
+                .client(builder.build())
+                .build();
+        mGistApi = retrofit.create(GistApi.class);
+        return mGistApi;
+    }
+
+
 
 }

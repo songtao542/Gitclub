@@ -28,7 +28,7 @@ import org.gitclub.model.User;
 import org.gitclub.ui.fragments.BaseFragment;
 import org.gitclub.ui.fragments.GistFragment;
 import org.gitclub.ui.fragments.IssuesFragment;
-import org.gitclub.ui.fragments.ProfileFragment;
+import org.gitclub.ui.fragments.OverviewFragment;
 import org.gitclub.ui.fragments.PullRequestsFragment;
 import org.gitclub.ui.fragments.StarsFragment;
 import org.gitclub.ui.view.UserView;
@@ -129,7 +129,7 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
         mCurrentFragment = mCachedFragments.get(tag);
         if (mCurrentFragment == null) {
             if (tag == TAG_PROFILE) {
-                mCurrentFragment = ProfileFragment.newInstance();
+                mCurrentFragment = OverviewFragment.newInstance();
             } else if (tag == TAG_STARS) {
                 mCurrentFragment = StarsFragment.newInstance();
             } else if (tag == TAG_GIST) {

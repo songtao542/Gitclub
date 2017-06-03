@@ -9,6 +9,7 @@ import android.view.ViewGroup;
 
 import org.gitclub.utils.SLog;
 
+import java.text.SimpleDateFormat;
 import java.util.List;
 
 import butterknife.ButterKnife;
@@ -49,6 +50,10 @@ public abstract class Item<T, VH extends Item.Holder> extends AbstractFlexibleIt
     public abstract VH createViewHolder(View view, FlexibleAdapter adapter);
 
     public abstract static class Holder<T> extends FlexibleViewHolder {
+
+        protected static final SimpleDateFormat DFT = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        //2017-05-28T05:42:49Z
+        protected static final SimpleDateFormat DFS = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
 
         public Holder(View view, FlexibleAdapter adapter) {
             super(view, adapter);

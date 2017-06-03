@@ -2,6 +2,7 @@ package org.gitclub.ui.data;
 
 import android.annotation.TargetApi;
 import android.content.Context;
+import android.graphics.PorterDuff;
 import android.os.Build;
 import android.view.View;
 import android.widget.TextView;
@@ -10,6 +11,7 @@ import org.gitclub.R;
 import org.gitclub.model.Repository;
 import org.gitclub.model.Star;
 import org.gitclub.utils.SLog;
+import org.gitclub.widget.Circle;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -40,7 +42,7 @@ public class StarItem extends Item<Star, StarItem.Holder> {
 
     @Override
     public int getLayoutRes() {
-        return R.layout.repo_item;
+        return R.layout.star_item;
     }
 
     @Override
@@ -55,6 +57,8 @@ public class StarItem extends Item<Star, StarItem.Holder> {
         TextView forked;
         @BindView(R.id.descrip)
         TextView descrip;
+        @BindView(R.id.languageColor)
+        Circle languageColor;
         @BindView(R.id.language)
         TextView language;
         @BindView(R.id.stars)
@@ -80,7 +84,7 @@ public class StarItem extends Item<Star, StarItem.Holder> {
 
             language.setText(star.language);
             Context context = itemView.getContext();
-            language.getCompoundDrawables()[0].setTint(Language.getColor(context, star.language));
+            languageColor.setColor(Language.getColor(context, star.language));
             if (star.stargazersCount > 0) {
                 stars.setVisibility(View.VISIBLE);
                 stars.setText(String.valueOf(star.stargazersCount));

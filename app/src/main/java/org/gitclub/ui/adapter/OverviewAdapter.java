@@ -25,7 +25,7 @@ import butterknife.ButterKnife;
  * Created by wangsongtao on 2017/5/13.
  */
 
-public class ProfileOverviewAdapter extends RecyclerView.Adapter<ProfileOverviewAdapter.Holder> {
+public class OverviewAdapter extends RecyclerView.Adapter<OverviewAdapter.Holder> {
 
     List<Repository> mRepos;
     List<Event> mEvents;

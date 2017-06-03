@@ -3,12 +3,33 @@ package org.gitclub.ui.fragments;
 import android.content.Context;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
 import org.gitclub.R;
+import org.gitclub.di.ActivityScope;
+import org.gitclub.di.components.ApplicationComponent;
+import org.gitclub.model.Gist;
+import org.gitclub.presenter.GistsPresenter;
+import org.gitclub.ui.data.GistItem;
+import org.gitclub.ui.data.StarItem;
+import org.gitclub.ui.view.GistsView;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.inject.Inject;
+
+import butterknife.BindView;
+import butterknife.ButterKnife;
+import eu.davidea.flexibleadapter.FlexibleAdapter;
+import eu.davidea.flexibleadapter.common.SmoothScrollLinearLayoutManager;
+import eu.davidea.flexibleadapter.items.AbstractFlexibleItem;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -18,9 +39,22 @@ import org.gitclub.R;
  * Use the {@link GistFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class GistFragment extends BaseFragment {
+public class GistFragment extends BaseFragment implements GistsView {
+    @ActivityScope
+    @dagger.Component(dependencies = {ApplicationComponent.class})
+    public interface Component {
+        void inject(GistFragment fragment);
+    }
 
     private OnFragmentInteractionListener mListener;
+
+
+    @Inject
+    GistsPresenter mGistsPresenter;
+    private FlexibleAdapter<AbstractFlexibleItem> mAdapter;
+
+    @BindView(R.id.recyclerView)
+    RecyclerView mRecyclerView;
 
     public GistFragment() {
         // Required empty public constructor
@@ -49,6 +83,32 @@ public class GistFragment extends BaseFragment {
         return inflater.inflate(R.layout.fragment_gist, container, false);
     }
 
+    @Override
+    public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+
+        ButterKnife.bind(this, view);
+
+        DaggerGistFragment_Component.builder().applicationComponent(getApplicationComponent()).build().inject(this);
+        ((AppCompatActivity) getActivity()).getSupportActionBar().setTitle("Gists");
+
+        mAdapter = new FlexibleAdapter<>(null, null, true);
+
+        mRecyclerView.setLayoutManager(new SmoothScrollLinearLayoutManager(getActivity()));
+//        mRecyclerView.setAdapter(mProfileOverviewAdapter);
+        mRecyclerView.setAdapter(mAdapter);
+        mRecyclerView.setHasFixedSize(true);
+        mAdapter.setStickyHeaders(true)// Simulate developer 2nd call mistake, now it's safe, not executed, no warning log message!
+                //.setDisplayHeadersAtStartUp(true)
+                .showAllHeaders();
+        mAdapter.setAnimationOnScrolling(true);
+        mAdapter.setAnimationOnReverseScrolling(true);
+
+        mGistsPresenter.setGistsView(this);
+        mGistsPresenter.getGists();
+
+    }
+
     // TODO: Rename method, update argument and hook method into UI event
     public void onButtonPressed(Uri uri) {
         if (mListener != null) {
@@ -73,4 +133,35 @@ public class GistFragment extends BaseFragment {
         mListener = null;
     }
 
+    @Override
+    public void gists(List<Gist> gists) {
+        ArrayList<AbstractFlexibleItem> items = new ArrayList<>();
+        items.addAll(GistItem.convert(gists));
+        mAdapter.updateDataSet(items);
+    }
+
+    @Override
+    public void showLoading() {
+
+    }
+
+    @Override
+    public void hideLoading() {
+
+    }
+
+    @Override
+    public void showRetry() {
+
+    }
+
+    @Override
+    public void hideRetry() {
+
+    }
+
+    @Override
+    public void showError(String message) {
+
+    }
 }

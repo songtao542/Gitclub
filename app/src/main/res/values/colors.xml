@@ -6,6 +6,8 @@
 
     <color name="colorAccent">#ffFF4081</color>
     <color name="textcolor">#ff757575</color>
+    <color name="textcolorHint">#ffc4c4c4</color>
+
     <color name="iconcolor">#ff757575</color>
     <color name="lang_java">#ffb17200</color>
     <color name="lang_shell">#ff86e246</color>

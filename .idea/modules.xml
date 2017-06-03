@@ -4,7 +4,6 @@
     <modules>
       <module fileurl="file://$PROJECT_DIR$/Gitclub.iml" filepath="$PROJECT_DIR$/Gitclub.iml" />
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
-      <module fileurl="file://$PROJECT_DIR$/gitclub.iml" filepath="$PROJECT_DIR$/gitclub.iml" />
     </modules>
   </component>
 </project>
