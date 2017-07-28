@@ -42,13 +42,6 @@ public abstract class Item<T, VH extends Item.Holder> extends AbstractFlexibleIt
         return this == o;
     }
 
-    @Override
-    public VH createViewHolder(FlexibleAdapter adapter, LayoutInflater inflater, ViewGroup parent) {
-        return createViewHolder(inflater.inflate(getLayoutRes(), parent, false), adapter);
-    }
-
-    public abstract VH createViewHolder(View view, FlexibleAdapter adapter);
-
     public abstract static class Holder<T> extends FlexibleViewHolder {
 
         protected static final SimpleDateFormat DFT = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");

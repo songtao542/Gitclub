@@ -44,6 +44,7 @@ public class RepositoryItem extends SectionableItem<Repository, RepositoryItem.H
 
     @Override
     public Holder createViewHolder(View view, FlexibleAdapter adapter) {
+        SLog.d(this, "createViewHolder:view=" + view);
         return new Holder(view, adapter);
     }
 

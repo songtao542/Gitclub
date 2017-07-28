@@ -8,6 +8,7 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import org.gitclub.R;
+import org.gitclub.utils.SLog;
 
 import java.util.List;
 
@@ -38,9 +39,15 @@ public class HeaderItem extends AbstractHeaderItem<HeaderItem.HeaderViewHolder> 
         return R.layout.header_item;
     }
 
+
+//    public HeaderViewHolder createViewHolder(FlexibleAdapter adapter, LayoutInflater inflater, ViewGroup parent) {
+//        return new HeaderViewHolder(inflater.inflate(getLayoutRes(), parent, false), adapter);
+//    }
+
     @Override
-    public HeaderViewHolder createViewHolder(FlexibleAdapter adapter, LayoutInflater inflater, ViewGroup parent) {
-        return new HeaderViewHolder(inflater.inflate(getLayoutRes(), parent, false), adapter);
+    public HeaderViewHolder createViewHolder(View view, FlexibleAdapter adapter) {
+        SLog.d(this, "createViewHolder:view=" + view);
+        return new HeaderViewHolder(view, adapter);
     }
 
     @Override

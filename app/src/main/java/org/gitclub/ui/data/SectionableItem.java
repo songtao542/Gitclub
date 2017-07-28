@@ -36,17 +36,14 @@ public abstract class SectionableItem<T, VH extends SectionableItem.Holder> exte
         holder.setData(mData);
     }
 
-    @Override
+
     public boolean equals(Object o) {
         return this == o;
     }
 
-    @Override
-    public VH createViewHolder(FlexibleAdapter adapter, LayoutInflater inflater, ViewGroup parent) {
-        return createViewHolder(inflater.inflate(getLayoutRes(), parent, false), adapter);
-    }
-
-    public abstract VH createViewHolder(View view, FlexibleAdapter adapter);
+//    public VH createViewHolder(FlexibleAdapter adapter, LayoutInflater inflater, ViewGroup parent) {
+//        return createViewHolder(inflater.inflate(getLayoutRes(), parent, false), adapter);
+//    }
 
     public abstract static class Holder<T> extends FlexibleViewHolder {
 
