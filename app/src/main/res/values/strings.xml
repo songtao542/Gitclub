@@ -24,4 +24,7 @@
 
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
+
+    <string name="banner_ad_unit_id">ca-app-pub-2676660804158457/9964222497</string>
+
 </resources>

@@ -1,0 +1,55 @@
+{
+  "project_info": {
+    "project_number": "415637384401",
+    "firebase_url": "https://gitclub-542.firebaseio.com",
+    "project_id": "gitclub-542",
+    "storage_bucket": "gitclub-542.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:415637384401:android:70df9bc0730180f1",
+        "android_client_info": {
+          "package_name": "com.aperise.gitclub"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "415637384401-jg5r6l2peistoc5qcugt2elo3i17g4um.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.aperise.gitclub",
+            "certificate_hash": "f74f0603635036fdbcc37c5707063c7e16c852cd"
+          }
+        },
+        {
+          "client_id": "415637384401-nmnfss76rdhjldhe2j8dvbu24ve853m0.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCu7AS2zyWY7JYU78kYWZsNrkz85nfa6zQ"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "415637384401-nmnfss76rdhjldhe2j8dvbu24ve853m0.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

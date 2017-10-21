@@ -2,7 +2,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="org.gitclub.ui.fragments.IssuesFragment">
+    tools:context="com.aperise.gitclub.ui.fragments.IssuesFragment">
 
     <!-- TODO: Update blank fragment layout -->
     <TextView
@@ -10,4 +10,10 @@
         android:layout_height="match_parent"
         android:text="Issues Issues Issues Issues" />
 
+    <FrameLayout
+        android:id="@+id/ad_placeholder"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom">
+    </FrameLayout>
 </FrameLayout>

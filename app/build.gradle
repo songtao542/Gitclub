@@ -1,15 +1,24 @@
 apply plugin: 'com.android.application'
 
 android {
+    signingConfigs {
+        config {
+            keyAlias 'gitclub'
+            keyPassword 'woshiwst'
+            storeFile file('/Users/wangsongtao/Documents/android-keystore/gitclub')
+            storePassword 'woshiwst'
+        }
+    }
     compileSdkVersion 25
     buildToolsVersion "26.0.0"
     defaultConfig {
-        applicationId "com.aperise.caonma"
+        applicationId "com.aperise.gitclub"
         minSdkVersion 23
         targetSdkVersion 25
         versionCode 1
         versionName "1.0"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+        signingConfig signingConfigs.config
     }
     buildTypes {
         release {
@@ -17,39 +26,52 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
+    productFlavors {
+    }
 }
 
 ext {
     supportVersion = "25.4.0"
 }
 
+configurations.all {
+    resolutionStrategy {
+        force "com.android.support:appcompat-v7:25.4.0"
+        force "com.android.support:design:25.4.0"
+        force "com.android.support:support-v4:25.4.0"
+        force "com.android.support:cardview-v7:25.4.0"
+    }
+}
+
 dependencies {
-    implementation fileTree(dir: 'libs', include: ['*.jar'])
+    implementation fileTree(include: ['*.jar'], dir: 'libs')
     androidTestImplementation('com.android.support.test.espresso:espresso-core:2.2.2', {
         exclude group: 'com.android.support', module: 'support-annotations'
     })
-
     implementation "com.android.support:appcompat-v7:${supportVersion}"
     implementation "com.android.support:design:${supportVersion}"
     implementation "com.android.support:support-v4:${supportVersion}"
     implementation "com.android.support:cardview-v7:${supportVersion}"
-    implementation "com.android.support.constraint:constraint-layout:1.0.2"
-    implementation "com.google.dagger:dagger:2.+"
-    implementation "com.squareup.retrofit2:retrofit:2.2.0"
-    implementation "com.squareup.retrofit2:adapter-rxjava2:2.2.0"
-    implementation "com.squareup.retrofit2:converter-gson:2.2.0"
-    implementation "com.squareup.okhttp3:logging-interceptor:3.6.0"
-    implementation "io.reactivex.rxjava2:rxjava:2.0.8"
-    implementation "io.reactivex.rxjava2:rxandroid:2.0.1"
-    implementation "com.jakewharton:butterknife:8.5.1"
-    implementation "com.squareup.okhttp3:okhttp:3.7.0"
-    implementation "com.facebook.fresco:fresco:1.3.0"
-    implementation "com.google.dagger:dagger-android:2.+"
-    implementation "com.google.dagger:dagger-android-support:2.+"
-    implementation "eu.davidea:flexible-adapter:5.+"
-    testImplementation "junit:junit:4.12"
+    implementation 'com.android.support.constraint:constraint-layout:1.0.2'
+    implementation 'com.google.dagger:dagger:2.+'
+    implementation 'com.squareup.retrofit2:retrofit:2.2.0'
+    implementation 'com.squareup.retrofit2:adapter-rxjava2:2.2.0'
+    implementation 'com.squareup.retrofit2:converter-gson:2.2.0'
+    implementation 'com.squareup.okhttp3:logging-interceptor:3.6.0'
+    implementation 'io.reactivex.rxjava2:rxjava:2.0.8'
+    implementation 'io.reactivex.rxjava2:rxandroid:2.0.1'
+    implementation 'com.jakewharton:butterknife:8.5.1'
+    implementation 'com.squareup.okhttp3:okhttp:3.7.0'
+    implementation 'com.facebook.fresco:fresco:1.3.0'
+    implementation 'com.google.dagger:dagger-android:2.+'
+    implementation 'com.google.dagger:dagger-android-support:2.+'
+    implementation 'eu.davidea:flexible-adapter:5.+'
+    testImplementation 'junit:junit:4.12'
     annotationProcessor "com.google.dagger:dagger-android-processor:2.+"
     annotationProcessor "com.google.dagger:dagger-compiler:2.+"
     annotationProcessor "com.jakewharton:butterknife-compiler:8.5.1"
 
+    implementation 'com.google.firebase:firebase-core:11.0.4'
+    implementation 'com.google.android.gms:play-services-ads:11.0.4'
 }
+apply plugin: 'com.google.gms.google-services'
