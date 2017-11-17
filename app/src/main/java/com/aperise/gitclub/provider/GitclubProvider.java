@@ -85,31 +85,42 @@ public class GitclubProvider extends ContentProvider {
         final Context context = getContext();
         final SQLiteDatabase db = getDatabase(context);
         long longId;
+        int result;
         switch (match) {
             case ACCESS_TOKEN:
-                return db.delete(GitclubContent.AccessToken.TABLE_NAME, selection, selectionArgs);
+                result = db.delete(GitclubContent.AccessToken.TABLE_NAME, selection, selectionArgs);
+                break;
             case ACCESS_TOKEN_ID:
                 longId = Long.parseLong(uri.getPathSegments().get(1));
                 SLog.d(TAG, "delete ACCESS_TOKEN_ID parameter id=" + longId);
-                return db.delete(GitclubContent.AccessToken.TABLE_NAME, GitclubContent.AccessTokenColumns._ID + "=" + longId + " AND (" + selection + ")", selectionArgs);
+                result = db.delete(GitclubContent.AccessToken.TABLE_NAME, GitclubContent.AccessTokenColumns._ID + "=" + longId + " AND (" + selection + ")", selectionArgs);
+                break;
             case USER:
-                return db.delete(GitclubContent.User.TABLE_NAME, selection, selectionArgs);
+                result = db.delete(GitclubContent.User.TABLE_NAME, selection, selectionArgs);
+                break;
             case USER_ID:
                 longId = Long.parseLong(uri.getPathSegments().get(1));
                 SLog.d(TAG, "delete USER_ID parameter id=" + longId);
-                return db.delete(GitclubContent.User.TABLE_NAME, GitclubContent.UserColumns._ID + "=" + longId + " AND (" + selection + ")", selectionArgs);
+                result = db.delete(GitclubContent.User.TABLE_NAME, GitclubContent.UserColumns._ID + "=" + longId + " AND (" + selection + ")", selectionArgs);
+                break;
             case USER_NAME:
                 String name = uri.getLastPathSegment();
                 SLog.d(TAG, "delete USER_NAME parameter name=" + name);
-                return db.delete(GitclubContent.User.TABLE_NAME, GitclubContent.UserColumns.LOGIN + "=" + name + " AND (" + selection + ")", selectionArgs);
+                result = db.delete(GitclubContent.User.TABLE_NAME, GitclubContent.UserColumns.LOGIN + "=" + name + " AND (" + selection + ")", selectionArgs);
+                break;
             case USER_EMAIL:
                 String email = uri.getLastPathSegment();
                 SLog.d(TAG, "delete USER_EMAIL parameter email=" + email);
-                return db.delete(GitclubContent.User.TABLE_NAME, GitclubContent.UserColumns.EMAIL + "=" + email + " AND (" + selection + ")", selectionArgs);
+                result = db.delete(GitclubContent.User.TABLE_NAME, GitclubContent.UserColumns.EMAIL + "=" + email + " AND (" + selection + ")", selectionArgs);
+                break;
             default:
                 SLog.d(TAG, "delete uri match nothing, uri=" + uri);
-                return 0;
+                result = 0;
         }
+        if (result != 0) {
+            getContext().getContentResolver().notifyChange(uri, null);
+        }
+        return result;
     }
 
 
@@ -161,6 +172,9 @@ public class GitclubProvider extends ContentProvider {
                 SLog.d(TAG, "insert uri match nothing, uri=" + uri);
                 break;
         }
+        if (resultUri != null) {
+            getContext().getContentResolver().notifyChange(resultUri, null);
+        }
         return resultUri;
     }
 
@@ -171,8 +185,7 @@ public class GitclubProvider extends ContentProvider {
     }
 
     @Override
-    public Cursor query(Uri uri, String[] projection, String selection,
-                        String[] selectionArgs, String sortOrder) {
+    public Cursor query(Uri uri, String[] projection, String selection, String[] selectionArgs, String sortOrder) {
         SLog.d(TAG, "query uri=" + uri);
         int match = sURIMatcher.match(uri);
         final Context context = getContext();
@@ -213,42 +226,53 @@ public class GitclubProvider extends ContentProvider {
     }
 
     @Override
-    public int update(Uri uri, ContentValues values, String selection,
-                      String[] selectionArgs) {
+    public int update(Uri uri, ContentValues values, String selection, String[] selectionArgs) {
         SLog.d(TAG, "update uri=" + uri);
         int match = sURIMatcher.match(uri);
         final Context context = getContext();
         final SQLiteDatabase db = getDatabase(context);
         long longId;
+        int result;
         switch (match) {
             case ACCESS_TOKEN:
-                return db.update(GitclubContent.AccessToken.TABLE_NAME, values, selection, selectionArgs);
+                result = db.update(GitclubContent.AccessToken.TABLE_NAME, values, selection, selectionArgs);
+                break;
             case ACCESS_TOKEN_ID:
                 longId = Long.parseLong(uri.getPathSegments().get(1));
                 SLog.d(TAG, "update ACCESS_TOKEN_ID parameter id=" + longId);
                 values.put(GitclubContent.AccessTokenColumns._ID, longId);
-                return db.update(GitclubContent.AccessToken.TABLE_NAME, values, selection, selectionArgs);
+                result = db.update(GitclubContent.AccessToken.TABLE_NAME, values, selection, selectionArgs);
+                break;
             case USER:
-                return db.update(GitclubContent.User.TABLE_NAME, values, selection, selectionArgs);
+                result = db.update(GitclubContent.User.TABLE_NAME, values, selection, selectionArgs);
+                break;
             case USER_ID:
                 longId = Long.parseLong(uri.getPathSegments().get(1));
                 SLog.d(TAG, "update USER_ID parameter id=" + longId);
                 values.put(GitclubContent.UserColumns._ID, longId);
-                return db.update(GitclubContent.User.TABLE_NAME, values, selection, selectionArgs);
+                result = db.update(GitclubContent.User.TABLE_NAME, values, selection, selectionArgs);
+                break;
             case USER_NAME:
                 String name = uri.getPathSegments().get(1);
                 SLog.d(TAG, "update USER_NAME parameter name=" + name);
                 values.put(GitclubContent.UserColumns.LOGIN, name);
-                return db.update(GitclubContent.User.TABLE_NAME, values, selection, selectionArgs);
+                result = db.update(GitclubContent.User.TABLE_NAME, values, selection, selectionArgs);
+                break;
             case USER_EMAIL:
                 String email = uri.getLastPathSegment();
                 SLog.d(TAG, "update USER_EMAIL parameter email=" + email);
                 values.put(GitclubContent.UserColumns.EMAIL, email);
-                return db.update(GitclubContent.User.TABLE_NAME, values, selection, selectionArgs);
+                result = db.update(GitclubContent.User.TABLE_NAME, values, selection, selectionArgs);
+                break;
             default:
                 SLog.d(TAG, "update uri match nothing, uri=" + uri);
-                return 0;
+                result = 0;
         }
+
+        if (result != 0) {
+            getContext().getContentResolver().notifyChange(uri, null);
+        }
+        return result;
     }
 
     @NonNull

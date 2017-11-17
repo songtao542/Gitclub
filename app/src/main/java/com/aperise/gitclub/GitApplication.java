@@ -1,7 +1,9 @@
 package com.aperise.gitclub;
 
 import android.app.Application;
+import android.content.Intent;
 
+import com.aperise.gitclub.test.TestService;
 import com.facebook.drawee.backends.pipeline.Fresco;
 
 import com.aperise.gitclub.data.UserTokenStore;
@@ -26,6 +28,8 @@ public class GitApplication extends Application {
         super.onCreate();
         Fresco.initialize(this);
         ensureApplicationComponent();
+        Intent intent = new Intent(this, TestService.class);
+        startService(intent);
     }
 
     private void ensureApplicationComponent() {

@@ -6,15 +6,14 @@
     <uses-permission android:name="android.permission.READ_PROFILE" />
     <uses-permission android:name="android.permission.READ_CONTACTS" />
     <uses-permission android:name="android.permission.INTERNET" />
-    <!--<uses-permission android:name="android.permission.GET_ACCOUNTS" />-->
-    <!--<uses-permission android:name="android.permission.GET_ACCOUNTS_PRIVILEGED" />-->
-    <!--<uses-permission android:name="android.permission.MANAGE_ACCOUNTS" />-->
-    <!--<uses-permission android:name="android.permission.AUTHENTICATE_ACCOUNTS" />-->
-    <!--<uses-permission android:name="android.permission.READ_SYNC_SETTINGS" />-->
-    <!--<uses-permission android:name="android.permission.WRITE_SYNC_SETTINGS" />-->
+    <!-- <uses-permission android:name="android.permission.GET_ACCOUNTS" /> -->
+    <!-- <uses-permission android:name="android.permission.GET_ACCOUNTS_PRIVILEGED" /> -->
+    <!-- <uses-permission android:name="android.permission.MANAGE_ACCOUNTS" /> -->
+    <!-- <uses-permission android:name="android.permission.AUTHENTICATE_ACCOUNTS" /> -->
+    <!-- <uses-permission android:name="android.permission.READ_SYNC_SETTINGS" /> -->
+    <!-- <uses-permission android:name="android.permission.WRITE_SYNC_SETTINGS" /> -->
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
-
 
     <application
         android:name=".GitApplication"
@@ -26,16 +25,15 @@
         android:theme="@style/AppTheme">
         <activity
             android:name=".ui.activities.LoginActivity"
-            android:label="@string/app_name">
-
-        </activity>
+            android:label="@string/app_name" />
 
         <provider
             android:name=".provider.GitclubProvider"
             android:authorities="org.gitclub.provider"
             android:enabled="true"
             android:exported="true"
-            android:label="@string/label_gitclubprovider" />
+            android:label="@string/label_gitclubprovider"
+            android:process="com.aperise.gitclub.provider" />
 
         <activity
             android:name=".ui.activities.MainActivity"
@@ -47,6 +45,30 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity
+            android:name=".test.TestActivity"
+            android:label="@string/test_name">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+        <service
+            android:name=".test.TestService"
+            android:enabled="true"
+            android:exported="true"
+            android:process="com.aperise.gitclub.service"></service>
+
+        <provider
+            android:name=".settings.SettingsProvider"
+            android:authorities="com.ape.settings"
+            android:enabled="true"
+            android:label="@string/label_gitclubprovider"
+            android:process="com.aperise.gitclub.settings">
+
+        </provider>
     </application>
 
 </manifest>
